@@ -1,0 +1,88 @@
+//GLOBALS
+Texture2D shaderTexture[2] : register(t1);
+Texture2D depthMapTexture : register(t0);
+
+SamplerState SampleTypeClamp : register(s0);
+SamplerState SampleTypeWrap  : register(s1);
+
+cbuffer LightBuffer
+{
+	float4 ambientColor;
+	float4 diffuseColor;
+};
+
+//TYPEDEFS
+struct PixelInputType
+{
+	float4 position : SV_POSITION;
+	float2 tex : TEXCOORD0;
+	float3 normal : NORMAL;
+	float4 lightViewPosition : TEXCOORD1;
+	float3 lightPos : TEXCOORD2;
+	float4 wPos : TEXCOORD3;
+	float3 tangent : TANGENT;
+    float3 binormal : BINORMAL;
+};
+
+//PIXEL SHADER
+float4 ShadowPixelShader(PixelInputType input): SV_TARGET
+{
+	float bias;
+	float4 color;
+	float2 projectTexCoord;
+	float depthValue;
+	float lightDepthValue;
+	float lightIntensity;
+	float4 textureColor;
+	float4 bumpMap;
+	float3 bumpNormal;
+	float3 lightVec;
+
+	//shadow mapping requires a bias adjustment when comparing the depth of the light and the depth of the object due to the low floating point precision of the depth map.
+    //set the bias value for fixing the floating point precision issues.
+	bias = 0.000001f;
+
+	color = ambientColor;
+
+
+	//calculate the projected texture coordinates for sampling the shadow map (depth buffer texture) based on the light's viewing position. 
+	projectTexCoord.x =  input.lightViewPosition.x / input.lightViewPosition.w / 2.0f + 0.5f;
+	projectTexCoord.y = -input.lightViewPosition.y / input.lightViewPosition.w / 2.0f + 0.5f;
+	
+	//determine if the projected coordinates are in the 0 to 1 range.  If so then this pixel is in the view of the light.
+	if((saturate(projectTexCoord.x) == projectTexCoord.x) && (saturate(projectTexCoord.y) == projectTexCoord.y))
+	{
+		//sample the shadow map depth value from the texture using the sampler at the projected coordinate location
+		depthValue = depthMapTexture.Sample(SampleTypeClamp, projectTexCoord).r;
+		lightDepthValue = input.lightViewPosition.z / input.lightViewPosition.w;
+
+		lightDepthValue = lightDepthValue - bias;
+
+		if(lightDepthValue < depthValue)
+		{	
+			bumpMap = shaderTexture[1].Sample(SampleTypeWrap, input.tex);
+			bumpMap = (bumpMap * 2.0f) - 1.0f;
+
+			bumpNormal = input.normal + bumpMap.x * input.tangent + bumpMap.y * input.binormal;
+
+			bumpNormal = normalize(bumpNormal);
+			lightIntensity = saturate(dot(bumpNormal, normalize(input.lightPos - input.wPos)));
+
+			if(lightIntensity > 0.0f)
+			{
+				color += (diffuseColor * lightIntensity);
+				color = saturate(color);
+			}
+		}
+	}
+
+
+
+	//the light intensity value is calculated as the dot product between the normal vector of triangle and the light direction vector.
+	//calculate the amount of light on this pixel
+
+	textureColor = shaderTexture[0].Sample(SampleTypeWrap, input.tex);
+
+	color = color * textureColor;
+	return color;
+}
