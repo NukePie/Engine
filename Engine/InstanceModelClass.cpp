@@ -655,15 +655,6 @@ bool InstanceModelClass::LoadDataStructures(char* filename, int& vertexCount, in
 				faceIndex++;
 			}
 		}
-
-		// Read in the remainder of the line.
-		//while(input != '\n')
-		//{
-		//	fin.get(input);
-		//}
-
-		//// Start reading the beginning of the next line.
-		//fin.get(input);
 	}
 	
 

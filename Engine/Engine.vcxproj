@@ -77,11 +77,13 @@
     <ClCompile Include="CameraClass.cpp" />
     <ClCompile Include="D3DClass.cpp" />
     <ClCompile Include="DepthShaderClass.cpp" />
+    <ClCompile Include="FrustumClass.cpp" />
     <ClCompile Include="GraphicsClass.cpp" />
     <ClCompile Include="InputClass.cpp" />
     <ClCompile Include="InstanceModelClass.cpp" />
     <ClCompile Include="LightClass.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="ModelListClass.cpp" />
     <ClCompile Include="ParticleShaderClass.cpp" />
     <ClCompile Include="ParticleSystemClass.cpp" />
     <ClCompile Include="PositionClass.cpp" />
@@ -98,10 +100,12 @@
     <ClInclude Include="cameraclass.h" />
     <ClInclude Include="d3dclass.h" />
     <ClInclude Include="depthshaderclass.h" />
+    <ClInclude Include="frustumclass.h" />
     <ClInclude Include="graphicsclass.h" />
     <ClInclude Include="inputclass.h" />
     <ClInclude Include="instancemodelclass.h" />
     <ClInclude Include="lightclass.h" />
+    <ClInclude Include="modellistclass.h" />
     <ClInclude Include="particleshaderclass.h" />
     <ClInclude Include="particlesystemclass.h" />
     <ClInclude Include="positionclass.h" />

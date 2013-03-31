@@ -16,6 +16,8 @@
 #include "rendertextureclass.h"
 #include "depthshaderclass.h"
 #include "shadowshaderclass.h"
+#include "modellistclass.h"
+#include "frustumclass.h"
 
 //GLOBALS
 const bool FULL_SCREEN = false;
@@ -44,11 +46,9 @@ private:
 	bool Render(unsigned long);
 
 private:
-	D3DClass* m_D3D; //A pointer to the Direct3D Class
+	D3DClass* m_D3D;
 	CameraClass* m_Camera;
-	InstanceModelClass* m_Model;
-	InstanceModelClass* m_city;
-	InstanceModelClass* m_Bullet;
+	InstanceModelClass *m_Model, *m_City, *m_Bullet, *m_Sphere;
 	LightClass* m_Light;
 	ParticleShaderClass* m_ParticleShader;
 	ParticleSystemClass* m_ParticleSystem, *m_ParticleSystem2, *m_ParticleSystem3;
@@ -58,9 +58,12 @@ private:
 	PositionClass* m_Position;
 	TerrainShaderClass* m_TerrainShader;
 
-
 	RenderTextureClass* m_RenderTexture;
 	DepthShaderClass* m_DepthShader;
 	ShadowShaderClass* m_ShadowShader;
+
+	ModelListClass* m_ModelList;
+	FrustumClass* m_Frustrum;
 };
+
 #endif

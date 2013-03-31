@@ -3,11 +3,12 @@
 
 GraphicsClass::GraphicsClass()
 {
-	m_D3D				= 0; //Set the pointer to NULL just in case
+	m_D3D				= 0;
 	m_Camera			= 0;
 	m_Model				= 0;
-	m_city				= 0;
+	m_City				= 0;
 	m_Bullet			= 0;
+	m_Sphere			= 0;
 	m_Light				= 0;
 	m_ParticleShader	= 0;
 	m_ParticleSystem	= 0;
@@ -18,7 +19,8 @@ GraphicsClass::GraphicsClass()
 	m_Terrain			= 0;
 	m_Position			= 0;
 	m_TerrainShader		= 0;
-
+	m_ModelList			= 0;
+	m_Frustrum			= 0;
 }
 
 GraphicsClass::GraphicsClass(const GraphicsClass& other)
@@ -188,14 +190,31 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd, HIN
 		return false;
 	}
 
-	//Create model object
+	//////////////////////////////////////
+	// BEGIN MODELS
+
+	// Create sphere model object.
+	m_Sphere = new InstanceModelClass;
+	if(!m_Sphere)
+	{
+		return false;
+	}
+
+	// Initialize sphere model object.
+	result = m_Sphere->Initialize(m_D3D->GetDevice(), "../Engine/sphere.obj", L"../Engine/brick.dds", L"../Engine/blankNormal.png");
+	if(!result)
+	{
+		return false;
+	}
+
+	// Create tomte model object.
 	m_Model = new InstanceModelClass;
 	if(!m_Model)
 	{
 		return false;
 	}
 	m_Model->SetInstanceCount(4);
-	//Initialize model object
+	//Initialize tomte model object
 	result = m_Model->Initialize(m_D3D->GetDevice(),"../Engine/Tomte.obj", L"../Engine/Tomte_Texture.png", L"../Engine/Tomte_Normal.png");
 	if(!result)
 	{
@@ -206,21 +225,21 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd, HIN
 	m_Model->SetPosition(0.0f, -30.25f, 0.0f);
 
 		//Create model object
-	m_city = new InstanceModelClass;
-	if(!m_city)
+	m_City = new InstanceModelClass;
+	if(!m_City)
 	{
 		return false;
 	}
-	m_city->SetInstanceCount(1);
+	m_City->SetInstanceCount(1);
 	//Initialize model object
-	result = m_city->Initialize(m_D3D->GetDevice(),"../Engine/Duk.obj", L"../Engine/duk.png", L"../Engine/blankNormal.png");
+	result = m_City->Initialize(m_D3D->GetDevice(),"../Engine/Duk.obj", L"../Engine/duk.png", L"../Engine/blankNormal.png");
 	if(!result)
 	{
 		MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
 		return false;
 	}
 
-	m_city->SetPosition(-20.0f, 0.0f, 10.0f);
+	m_City->SetPosition(-20.0f, 0.0f, 10.0f);
 
 
 		//Create model object
@@ -240,8 +259,38 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd, HIN
 
 	m_Bullet->SetPosition(0.0f, -27.0f, -30.0f);
 
+	// END MODELS
+	///////////////////////////////////////////////
+	// BEGIN MODEL LIST
 
+	// Create the model list object.
+	m_ModelList = new ModelListClass();
+	if(!m_ModelList)
+	{
+		return false;
+	}
 
+	// Initilize the model list object.
+	result = m_ModelList->Initialize(25);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the model list object.", L"Error", MB_OK);
+		return false;
+	}
+
+	// END MOEL LIST
+	/////////////////////////////////////////////
+	// BEGIN FRUSTRUM
+
+	// Create the frustrum object.
+	m_Frustrum = new FrustumClass;
+	if(!m_Frustrum)
+	{
+		return false;
+	}
+
+	// END FRUSTRUM
+	///////////////////////////////////////////////
 
 	//create the light object
 	m_Light = new LightClass;
@@ -432,8 +481,18 @@ void GraphicsClass::Shutdown()
 		m_Bullet = 0;
 	}
 
+	if(m_Frustrum)
+	{
+		delete m_Frustrum;
+		m_Frustrum = 0;
+	}
 
-
+	if(m_ModelList)
+	{
+		m_ModelList->Shutdown();
+		delete m_ModelList;
+		m_ModelList = 0;
+	}
 
 	if(m_Camera)
 	{
@@ -441,7 +500,7 @@ void GraphicsClass::Shutdown()
 		m_Camera = 0;
 	}
 
-	if(m_D3D) //Se if the pointer is initialized, useless to try and shut D3D when we know it hasn't initialized properly.
+	if(m_D3D)
 	{
 		m_D3D->Shutdown();
 		delete m_D3D;
@@ -556,13 +615,13 @@ bool GraphicsClass::RenderSceneToTexture()
 	m_Light->GetViewMatrix(lightViewMatrix);
 	m_Light->GetProjectionMatrix(lightProjectionMatrix);
 
-	// Setup the translation matrix for the sphere model.
-	m_city->GetPosition(posX, posY, posZ);
+	// Setup the translation matrix for the city model.
+	m_City->GetPosition(posX, posY, posZ);
 	D3DXMatrixTranslation(&worldMatrix, posX, posY, posZ);
 
-	// Render the sphere model with the depth shader.
-	m_city->Render(m_D3D->GetDeviceContext());
-	result = m_DepthShader->Render(m_D3D->GetDeviceContext(), m_city->GetIndexCount(), worldMatrix, lightViewMatrix, lightProjectionMatrix);
+	// Render the city model with the depth shader.
+	m_City->Render(m_D3D->GetDeviceContext());
+	result = m_DepthShader->Render(m_D3D->GetDeviceContext(), m_City->GetIndexCount(), worldMatrix, lightViewMatrix, lightProjectionMatrix);
 	if(!result)
 	{
 		return false;
@@ -612,10 +671,10 @@ bool GraphicsClass::HandleInput(float frameTime)
 	bool keyDown;
 	float posX, posY, posZ, rotX, rotY, rotZ;
 	int mousePosX, mousePosY;
-	//set the frame time fort calc the updated position
+	// Set the frame time fort calc the updated position.
 	m_Position->SetFrameTime(frameTime);
 
-	//handle the input
+	// Handle the input.
 	keyDown = m_Input->IsLeftPressed();
 	m_Position->TurnLeft(keyDown);
 
@@ -650,14 +709,14 @@ bool GraphicsClass::HandleInput(float frameTime)
 	m_Position->MouseLook(mousePosX, mousePosY);
 	m_Input->CenterMouse();
 
-	//get the view point position/rotation
+	// Get the view point position/rotation.
 	
 	m_Position->GetRotation(rotX, rotY, rotZ);
 	m_Position->GetPosition(posX, posY, posZ);
-	//set position of the camera
+	// Set position of the camera.
 	
 	m_Camera->SetRotation(rotX, rotY, rotZ);
-	//set height to terrain
+	// Set height to terrain.
 	float height = m_Terrain->GetHeightAtPos(-50, -50);
 	if(height == -1.0f)
 	{
@@ -675,8 +734,10 @@ bool GraphicsClass::Render(unsigned long updateCount)
 {
 	D3DXMATRIX worldMatrix, viewMatrix, projectionMatrix, translateMatrix;
 	D3DXMATRIX lightViewMatrix, lightProjectionMatrix;
-	bool result;
-	float posX, posY, posZ;
+	D3DXVECTOR4 color;
+	int modelCount, renderCount, index;
+	bool result, renderModel;
+	float posX, posY, posZ, radius;
 	
 	result = RenderSceneToTexture();
 	if(!result)
@@ -684,16 +745,16 @@ bool GraphicsClass::Render(unsigned long updateCount)
 		return false;
 	}
 	
-	m_D3D->BeginScene(0.0f, 0.0f, 0.0f,1.0f); //Clear the buffers and set the color to babyPink ;P
+	// Clear the buffers and set the color to grey.
+	m_D3D->BeginScene(0.1f, 0.1f, 0.1f, 1.0f); 
 
-	//Generate the view matrix based on Cam's pos
+	// Generate the view matrix based on Cam's pos.
 	m_Camera->Render();
 
 	m_Light->GenerateViewMatrix();
 
 	m_Camera->GetViewMatrix(viewMatrix);
 	m_D3D->GetWorldMatrix(worldMatrix);
-	//D3DXMatrixRotationY(&worldMatrix, (float)updateCount * 0.01f);	//dafuq is this?????
 	m_D3D->GetProjectionMatrix(projectionMatrix);
 
 	m_Light->GetViewMatrix(lightViewMatrix);
@@ -746,21 +807,21 @@ bool GraphicsClass::Render(unsigned long updateCount)
 	// Reset the world matrix.
 	m_D3D->GetWorldMatrix(worldMatrix);
 
-	m_city->GetPosition(posX, posY, posZ);
+	m_City->GetPosition(posX, posY, posZ);
 	D3DXMatrixTranslation(&worldMatrix, posX, posY, posZ);
 
-	m_city->Render(m_D3D->GetDeviceContext());
+	m_City->Render(m_D3D->GetDeviceContext());
 	
 	result = m_ShadowShader->Render(
 		m_D3D->GetDeviceContext(),
-		m_city->GetIndexCount(),
-		m_city->GetInstanceCount(),
+		m_City->GetIndexCount(),
+		m_City->GetInstanceCount(),
 		worldMatrix,
 		viewMatrix,
 		projectionMatrix,
 		lightViewMatrix,
 		lightProjectionMatrix,
-		m_city->GetTextureArray(),
+		m_City->GetTextureArray(),
 		m_RenderTexture->GetShaderResourceView(),
 		m_Light->GetPosition(),
 		m_Light->GetAmbientColor(),
@@ -804,14 +865,14 @@ bool GraphicsClass::Render(unsigned long updateCount)
 	// Reset the world matrix.
 	m_D3D->GetWorldMatrix(worldMatrix);
 
-	//turn on alpha blending
+	// Turn on alpha blending.
 	m_D3D->EnableAlphaBlending();
 
-	//put the particle system vertex and index buffers on the graphics pipeline to prepare them for drawing
+	// Put the particle system vertex and index buffers on the graphics pipeline to prepare them for drawing.
 	m_ParticleSystem->Render(m_D3D->GetDeviceContext());
 	
 
-	//render the model using the texture shader
+	// Render the model using the texture shader.
 	result = m_ParticleShader->Render(m_D3D->GetDeviceContext(), m_ParticleSystem->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_ParticleSystem->GetTexture());
 	if(!result)
 	{
@@ -832,9 +893,76 @@ bool GraphicsClass::Render(unsigned long updateCount)
 		return false;
 	}
 	
-	//turn off alpha blending
+	// Turn off alpha blending.
 	m_D3D->DisableAlphaBlending();
 
-	m_D3D->EndScene();//Show the rendered result on the sceen
+	////////////////////////////////////////////////////
+	// BEGIN FRUSTRUM CULLING
+
+	// Construct the frustrum.
+	m_Frustrum->ConstructFrustum(SCREEN_DEPTH, projectionMatrix, viewMatrix);
+
+	// Get the number of models to be rendered.
+	modelCount = m_ModelList->GetModelCount();
+
+	// Initialize the count of models that have been rendered.
+	renderCount = 0;
+
+	// Go through all the models and render them only if they can be seen by the camera view.
+	for(index = 0; index < modelCount; index++)
+	{
+		// Get the position and color of the sphere model at this index.
+		m_ModelList->GetData(index, posX, posY, posZ, color);
+
+		// Set the radius of the sphere to 1.0 since this is already known.
+		// NOTE: Change this to a lower value, like 0.1 to see the spheres get culled.
+		radius = 1.0f;
+
+		// Check if the sphere model is in the view frustrum.
+		renderModel = m_Frustrum->CheckSphere(posX, posY, posZ, radius);
+
+		// If it can be seen then render it, if not skip this model and check the next sphere.
+		if(renderModel)
+		{
+			// Move the model to the location it should be rendered it.
+			D3DXMatrixTranslation(&worldMatrix, posX, posY, posZ);
+
+			// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
+			m_Sphere->Render(m_D3D->GetDeviceContext());
+
+			// Render the model using the shadow shader
+			result = m_ShadowShader->Render(
+				m_D3D->GetDeviceContext(),
+				m_Sphere->GetIndexCount(),
+				m_Sphere->GetInstanceCount(),
+				worldMatrix,
+				viewMatrix,
+				projectionMatrix,
+				lightViewMatrix,
+				lightProjectionMatrix,
+				m_Sphere->GetTextureArray(),
+				m_RenderTexture->GetShaderResourceView(),
+				m_Light->GetPosition(),
+				m_Light->GetAmbientColor(),
+				m_Light->GetDiffuseColor()
+				);
+			if(!result)
+			{
+				return false;
+			}
+
+			//Reset to the original world matrix.
+			m_D3D->GetWorldMatrix(worldMatrix);
+
+			// Since this model was rendered then increase the count for this frame.
+			renderCount++;
+		}
+	}
+
+	// END FRUSTRUM CULLING
+	//////////////////////////////////////////////////////
+
+	// Show the rendered result on the sceen.
+	m_D3D->EndScene();
 	return true;
 }
