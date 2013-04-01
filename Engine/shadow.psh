@@ -5,6 +5,9 @@ Texture2D depthMapTexture : register(t0);
 SamplerState SampleTypeClamp : register(s0);
 SamplerState SampleTypeWrap  : register(s1);
 
+static const float SMAP_SIZE = 2048.0f;
+static const float SMAP_DX = 1.0f / SMAP_SIZE;
+
 cbuffer LightBuffer
 {
 	float4 ambientColor;
@@ -38,27 +41,57 @@ float4 ShadowPixelShader(PixelInputType input): SV_TARGET
 	float3 bumpNormal;
 	float3 lightVec;
 
-	//shadow mapping requires a bias adjustment when comparing the depth of the light and the depth of the object due to the low floating point precision of the depth map.
-    //set the bias value for fixing the floating point precision issues.
+	// Shadow mapping requires a bias adjustment when comparing the depth of the light and the depth of the object due to the low floating point precision of the depth map.
+    // Set the bias value for fixing the floating point precision issues.
 	bias = 0.000001f;
 
 	color = ambientColor;
 
 
-	//calculate the projected texture coordinates for sampling the shadow map (depth buffer texture) based on the light's viewing position. 
+	// Calculate the projected texture coordinates for sampling the shadow map (depth buffer texture) based on the light's viewing position. 
 	projectTexCoord.x =  input.lightViewPosition.x / input.lightViewPosition.w / 2.0f + 0.5f;
 	projectTexCoord.y = -input.lightViewPosition.y / input.lightViewPosition.w / 2.0f + 0.5f;
 	
-	//determine if the projected coordinates are in the 0 to 1 range.  If so then this pixel is in the view of the light.
+	// Determine if the projected coordinates are in the 0 to 1 range.  If so then this pixel is in the view of the light.
 	if((saturate(projectTexCoord.x) == projectTexCoord.x) && (saturate(projectTexCoord.y) == projectTexCoord.y))
 	{
-		//sample the shadow map depth value from the texture using the sampler at the projected coordinate location
+		// Sample the shadow map depth value from the texture using the sampler at the projected coordinate location.
 		depthValue = depthMapTexture.Sample(SampleTypeClamp, projectTexCoord).r;
 		lightDepthValue = input.lightViewPosition.z / input.lightViewPosition.w;
 
 		lightDepthValue = lightDepthValue - bias;
 
-		if(lightDepthValue < depthValue)
+		/////////////////////////////////////////
+		// BEGIN PCF
+		//-------------------------
+		// Based on page 678 - 680 in 3D Game Programming With Direct X 11
+		//
+
+		float sum = 0;
+		float shadowCoeff = 0;
+
+		// Sample shadow map to get the nearest depth to light.
+		float s0 = depthMapTexture.Sample(SampleTypeClamp, projectTexCoord.xy).r;
+		float s1 = depthMapTexture.Sample(SampleTypeClamp, projectTexCoord.xy + float2(SMAP_DX, 0)).r;
+		float s2 = depthMapTexture.Sample(SampleTypeClamp, projectTexCoord.xy + float2(0, SMAP_DX)).r;
+		float s3 = depthMapTexture.Sample(SampleTypeClamp, projectTexCoord.xy + float2(SMAP_DX, SMAP_DX)).r;
+
+		// Check what samples are in shadow.
+		float result0 = lightDepthValue <= s0;
+		float result1 = lightDepthValue <= s1;
+		float result2 = lightDepthValue <= s2;
+		float result3 = lightDepthValue <= s3;
+
+		// Summarize all the sample results.
+		sum = result0 + result1 + result2 + result3;
+
+		// Divide the sum by the amount of samples to get the final effect.
+		shadowCoeff = sum / 4;
+
+		// END PCF
+		/////////////////////////////////////////
+
+		if(shadowCoeff > 0)
 		{	
 			bumpMap = shaderTexture[1].Sample(SampleTypeWrap, input.tex);
 			bumpMap = (bumpMap * 2.0f) - 1.0f;
@@ -66,7 +99,7 @@ float4 ShadowPixelShader(PixelInputType input): SV_TARGET
 			bumpNormal = input.normal + bumpMap.x * input.tangent + bumpMap.y * input.binormal;
 
 			bumpNormal = normalize(bumpNormal);
-			lightIntensity = saturate(dot(bumpNormal, normalize(input.lightPos - input.wPos)));
+			lightIntensity = saturate(dot(bumpNormal, normalize(input.lightPos - input.wPos)) * shadowCoeff);
 
 			if(lightIntensity > 0.0f)
 			{
