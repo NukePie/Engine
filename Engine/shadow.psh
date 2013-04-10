@@ -5,6 +5,13 @@ Texture2D depthMapTexture : register(t0);
 SamplerState SampleTypeClamp : register(s0);
 SamplerState SampleTypeWrap  : register(s1);
 
+SamplerState SampleTypeLinearClamp
+{
+	Filter = MIN_MAG_MIP_ANISOTROPIC;
+	AddressU = Clamp;
+	AddressV = Clamp;
+};
+
 static const float SMAP_SIZE = 2048.0f;
 static const float SMAP_DX = 1.0f / SMAP_SIZE;
 
@@ -26,6 +33,8 @@ struct PixelInputType
 	float3 tangent : TANGENT;
     float3 binormal : BINORMAL;
 };
+
+
 
 //PIXEL SHADER
 float4 ShadowPixelShader(PixelInputType input): SV_TARGET
@@ -56,7 +65,7 @@ float4 ShadowPixelShader(PixelInputType input): SV_TARGET
 	if((saturate(projectTexCoord.x) == projectTexCoord.x) && (saturate(projectTexCoord.y) == projectTexCoord.y))
 	{
 		// Sample the shadow map depth value from the texture using the sampler at the projected coordinate location.
-		depthValue = depthMapTexture.Sample(SampleTypeClamp, projectTexCoord).r;
+		depthValue = depthMapTexture.Sample(SampleTypeLinearClamp, projectTexCoord).r;
 		lightDepthValue = input.lightViewPosition.z / input.lightViewPosition.w;
 
 		lightDepthValue = lightDepthValue - bias;
@@ -71,28 +80,38 @@ float4 ShadowPixelShader(PixelInputType input): SV_TARGET
 		float shadowCoeff = 0;
 
 		// Sample shadow map to get the nearest depth to light.
-		float s0 = depthMapTexture.Sample(SampleTypeClamp, projectTexCoord.xy).r;
-		float s1 = depthMapTexture.Sample(SampleTypeClamp, projectTexCoord.xy + float2(SMAP_DX, 0)).r;
-		float s2 = depthMapTexture.Sample(SampleTypeClamp, projectTexCoord.xy + float2(0, SMAP_DX)).r;
-		float s3 = depthMapTexture.Sample(SampleTypeClamp, projectTexCoord.xy + float2(SMAP_DX, SMAP_DX)).r;
+		float ss0 = depthMapTexture.Sample(SampleTypeLinearClamp, projectTexCoord.xy).r; // center
+		float ss1 = depthMapTexture.Sample(SampleTypeLinearClamp, projectTexCoord.xy + float2(-SMAP_DX, 0)).r; // left
+		float ss2 = depthMapTexture.Sample(SampleTypeLinearClamp, projectTexCoord.xy + float2(-SMAP_DX, -SMAP_DX)).r; // left-up
+		float ss3 = depthMapTexture.Sample(SampleTypeLinearClamp, projectTexCoord.xy + float2(0, -SMAP_DX)).r; // up
+		float ss4 = depthMapTexture.Sample(SampleTypeLinearClamp, projectTexCoord.xy + float2(SMAP_DX, -SMAP_DX)).r; // up-right
+		float ss5 = depthMapTexture.Sample(SampleTypeLinearClamp, projectTexCoord.xy + float2(SMAP_DX, 0)).r; // right
+		float ss6 = depthMapTexture.Sample(SampleTypeLinearClamp, projectTexCoord.xy + float2(SMAP_DX, SMAP_DX)).r; // down-right
+		float ss7 = depthMapTexture.Sample(SampleTypeLinearClamp, projectTexCoord.xy + float2(0, SMAP_DX)).r; // down
+		float ss8 = depthMapTexture.Sample(SampleTypeLinearClamp, projectTexCoord.xy + float2(-SMAP_DX, SMAP_DX)).r; // down-left
 
 		// Check what samples are in shadow.
-		float result0 = lightDepthValue <= s0;
-		float result1 = lightDepthValue <= s1;
-		float result2 = lightDepthValue <= s2;
-		float result3 = lightDepthValue <= s3;
+		float result0 = lightDepthValue <= ss0;
+		float result1 = lightDepthValue <= ss1;
+		float result2 = lightDepthValue <= ss2;
+		float result3 = lightDepthValue <= ss3;
+		float result4 = lightDepthValue <= ss4;
+		float result5 = lightDepthValue <= ss5;
+		float result6 = lightDepthValue <= ss6;
+		float result7 = lightDepthValue <= ss7;
+		float result8 = lightDepthValue <= ss8;
 
 		// Summarize all the sample results.
-		sum = result0 + result1 + result2 + result3;
+		sum = result0 + result1 + result2 + result3 + result4 + result5 + result6 + result7 + result8;
 
 		// Divide the sum by the amount of samples to get the final effect.
-		shadowCoeff = sum / 4;
+		shadowCoeff = sum / 9;
 
 		// END PCF
 		/////////////////////////////////////////
 
 		if(shadowCoeff > 0)
-		{	
+		{
 			bumpMap = shaderTexture[1].Sample(SampleTypeWrap, input.tex);
 			bumpMap = (bumpMap * 2.0f) - 1.0f;
 
@@ -108,8 +127,6 @@ float4 ShadowPixelShader(PixelInputType input): SV_TARGET
 			}
 		}
 	}
-
-
 
 	//the light intensity value is calculated as the dot product between the normal vector of triangle and the light direction vector.
 	//calculate the amount of light on this pixel
