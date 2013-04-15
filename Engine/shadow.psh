@@ -34,7 +34,32 @@ struct PixelInputType
     float3 binormal : BINORMAL;
 };
 
+// This method is used to do a 2x2 PCF calculation.
+float PCF2x2(float2 projTexCoords, float lightDepthValue, float2 offset)
+{
+	float result = 0.0f;
+	float2 offsetPtc;
 
+	// Offset the projected texture coordinates with the offset value
+	offsetPtc = projTexCoords + SMAP_DX * offset;
+
+	// Sample shadow map to get the nearest depth to light.
+	float ss0 = depthMapTexture.Sample(SampleTypeLinearClamp, offsetPtc.xy).r; // center
+	float ss1 = depthMapTexture.Sample(SampleTypeLinearClamp, offsetPtc.xy + float2(SMAP_DX, 0)).r; // right
+	float ss2 = depthMapTexture.Sample(SampleTypeLinearClamp, offsetPtc.xy + float2(0, SMAP_DX)).r; // down
+	float ss3 = depthMapTexture.Sample(SampleTypeLinearClamp, offsetPtc.xy + float2(SMAP_DX, SMAP_DX)).r; // down-right
+	
+	// Check what samples are in shadow.
+	float result0 = lightDepthValue <= ss0;
+	float result1 = lightDepthValue <= ss1;
+	float result2 = lightDepthValue <= ss2;
+	float result3 = lightDepthValue <= ss3;
+
+	// Add together the resulting values and divide by amount of values so it adds up to 1.
+	result = (result0 + result1 + result2 + result3) / 4;
+
+	return result;
+}
 
 //PIXEL SHADER
 float4 ShadowPixelShader(PixelInputType input): SV_TARGET
@@ -79,37 +104,22 @@ float4 ShadowPixelShader(PixelInputType input): SV_TARGET
 		float sum = 0;
 		float shadowCoeff = 0;
 
-		// Sample shadow map to get the nearest depth to light.
-		float ss0 = depthMapTexture.Sample(SampleTypeLinearClamp, projectTexCoord.xy).r; // center
-		float ss1 = depthMapTexture.Sample(SampleTypeLinearClamp, projectTexCoord.xy + float2(-SMAP_DX, 0)).r; // left
-		float ss2 = depthMapTexture.Sample(SampleTypeLinearClamp, projectTexCoord.xy + float2(-SMAP_DX, -SMAP_DX)).r; // left-up
-		float ss3 = depthMapTexture.Sample(SampleTypeLinearClamp, projectTexCoord.xy + float2(0, -SMAP_DX)).r; // up
-		float ss4 = depthMapTexture.Sample(SampleTypeLinearClamp, projectTexCoord.xy + float2(SMAP_DX, -SMAP_DX)).r; // up-right
-		float ss5 = depthMapTexture.Sample(SampleTypeLinearClamp, projectTexCoord.xy + float2(SMAP_DX, 0)).r; // right
-		float ss6 = depthMapTexture.Sample(SampleTypeLinearClamp, projectTexCoord.xy + float2(SMAP_DX, SMAP_DX)).r; // down-right
-		float ss7 = depthMapTexture.Sample(SampleTypeLinearClamp, projectTexCoord.xy + float2(0, SMAP_DX)).r; // down
-		float ss8 = depthMapTexture.Sample(SampleTypeLinearClamp, projectTexCoord.xy + float2(-SMAP_DX, SMAP_DX)).r; // down-left
-
-		// Check what samples are in shadow.
-		float result0 = lightDepthValue <= ss0;
-		float result1 = lightDepthValue <= ss1;
-		float result2 = lightDepthValue <= ss2;
-		float result3 = lightDepthValue <= ss3;
-		float result4 = lightDepthValue <= ss4;
-		float result5 = lightDepthValue <= ss5;
-		float result6 = lightDepthValue <= ss6;
-		float result7 = lightDepthValue <= ss7;
-		float result8 = lightDepthValue <= ss8;
+		// Sample the shadow map in 4 places (each with a 2x2 grid) to determine how much in shadow each sample is.
+		float result0 = PCF2x2(projectTexCoord, lightDepthValue, float2 (-1.0f, -1.0f) ); // Up left
+		float result1 = PCF2x2(projectTexCoord, lightDepthValue, float2 (1.0f, -1.0f) ); // Up right
+		float result2 = PCF2x2(projectTexCoord, lightDepthValue, float2 (-1.0f, 1.0f) ); // Down left
+		float result3 = PCF2x2(projectTexCoord, lightDepthValue, float2 (1.0f, 1.0f) ); // Down right
 
 		// Summarize all the sample results.
-		sum = result0 + result1 + result2 + result3 + result4 + result5 + result6 + result7 + result8;
+		sum = result0 + result1 + result2 + result3;
 
 		// Divide the sum by the amount of samples to get the final effect.
-		shadowCoeff = sum / 9;
+		shadowCoeff = sum / 4;
 
 		// END PCF
 		/////////////////////////////////////////
 
+		// The final PCF value is used when determining if lighting calculations should be done
 		if(shadowCoeff > 0)
 		{
 			bumpMap = shaderTexture[1].Sample(SampleTypeWrap, input.tex);
@@ -118,6 +128,8 @@ float4 ShadowPixelShader(PixelInputType input): SV_TARGET
 			bumpNormal = input.normal + bumpMap.x * input.tangent + bumpMap.y * input.binormal;
 
 			bumpNormal = normalize(bumpNormal);
+
+			// The value from the PCF calculations is used to determine how lit up the pixel should be
 			lightIntensity = saturate(dot(bumpNormal, normalize(input.lightPos - input.wPos)) * shadowCoeff);
 
 			if(lightIntensity > 0.0f)
