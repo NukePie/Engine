@@ -39,6 +39,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -79,6 +81,7 @@
     <ClCompile Include="DepthShaderClass.cpp" />
     <ClCompile Include="FrustumClass.cpp" />
     <ClCompile Include="GraphicsClass.cpp" />
+    <ClCompile Include="Importer.cpp" />
     <ClCompile Include="InputClass.cpp" />
     <ClCompile Include="InstanceModelClass.cpp" />
     <ClCompile Include="LightClass.cpp" />
@@ -102,6 +105,7 @@
     <ClInclude Include="depthshaderclass.h" />
     <ClInclude Include="frustumclass.h" />
     <ClInclude Include="graphicsclass.h" />
+    <ClInclude Include="importer.h" />
     <ClInclude Include="inputclass.h" />
     <ClInclude Include="instancemodelclass.h" />
     <ClInclude Include="lightclass.h" />

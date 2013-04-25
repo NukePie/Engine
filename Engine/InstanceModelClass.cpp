@@ -11,6 +11,7 @@ InstanceModelClass::InstanceModelClass()
 	m_TextureArray = 0;
 	m_model = 0;
 	m_instanceCount = 1;
+	m_importer = 0;
 }
 
 InstanceModelClass::InstanceModelClass(const InstanceModelClass& other)
@@ -24,6 +25,14 @@ InstanceModelClass::~InstanceModelClass()
 bool InstanceModelClass::Initialize(ID3D11Device* device, char* modelFilename, WCHAR* textureFilename1, WCHAR* textureFilename2)
 {
 	bool result;
+
+	m_importer = new Importer();
+	if(!m_importer)
+	{
+		return false;
+	}
+
+	m_importer->Initialize("../Engine/cube.txt");
 
 	result = LoadFile(modelFilename);
 	if(!result)
@@ -55,6 +64,12 @@ void InstanceModelClass::Shutdown()
 	ShutdownBuffers(); //release the vertex and index buffers
 
 	ReleaseModel();
+
+	if(m_importer)
+	{
+		delete m_importer;
+		m_importer = 0;
+	}
 
 	return;
 }
@@ -311,10 +326,6 @@ void InstanceModelClass::CalculateModelVectors()
 	return;
 }
 
-
-
-
-
 void InstanceModelClass::CalculateTangentBinormal(TempVertexType vertex1, TempVertexType vertex2, TempVertexType vertex3, VectorType& tangent, VectorType& binormal)
 {
 	float vector1[3], vector2[3];
@@ -371,7 +382,6 @@ void InstanceModelClass::CalculateNormal(VectorType tangent, VectorType binormal
 
 	return;
 }
-
 
 void InstanceModelClass::ReleaseTextures()
 {
@@ -474,6 +484,12 @@ bool InstanceModelClass::LoadFile(char* filename)
 	m_vertexCount = (faceCount * 3);
 	m_indexCount = (faceCount * 3);
 	result = LoadDataStructures(filename, vertexCount, textureCount, normalCount, faceCount);
+	if(!result)
+	{
+		return false;
+	}
+
+	result = m_importer->LoadModel();
 	if(!result)
 	{
 		return false;

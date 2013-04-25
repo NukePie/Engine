@@ -14,6 +14,7 @@ using namespace std;
 
 //MY CLASS INCLUDES
 #include "texturearrayclass.h"
+#include "importer.h"
 
 
 class InstanceModelClass
@@ -127,6 +128,7 @@ private:
 	TextureArrayClass* m_TextureArray;
 
 	ModelType* m_model;
+	Importer* m_importer;
 
 	float m_positionX, m_positionY, m_positionZ;
 };
