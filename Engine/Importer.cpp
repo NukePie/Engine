@@ -36,7 +36,7 @@ bool Importer::LoadModel()
 				vector<vertexDataType> frameData;
 				vertexDataType vertexData;
 
-				while(input != 'c')
+				while(input != 'e')
 				{
 					fin.get(input);
 					if(input == 'p')
@@ -104,14 +104,15 @@ bool Importer::LoadModel()
 
 	fin.close();
 
+	LoadCamera();
+
 	return true;
 }
 
 bool Importer::LoadCamera()
 {
-
 	ifstream fin;
-	char input;
+	char input[256];
 
 	fin.open(m_filename);
 	if(fin.fail() == true)
@@ -119,41 +120,31 @@ bool Importer::LoadCamera()
 		return false;
 	}
 
-	fin.get(input);
+	fin >> input;
 	while(!fin.eof())
 	{
-		fin.get(input);
-		if(input == 'c')
+		if(strcmp(input, "cam") == 0)
 		{
-			fin.get(input);
-			if(input == 'e')
-			{
-				cameraDataType cameraData;
-				vector<cameraDataType> frameCamData;
+            cameraDataType cameraData;
 
-				//int frameCount
+			char tempName[32];
 
-				if(input == 'e')
-				{
-					fin >> cameraData.x;
-					fin >> cameraData.y;
-					fin >> cameraData.z;
-
-					//Count++;
-				}
-
-				/*if(Count == 4)
-				{
-					frameCamData.push_back(cameraData);
-					Count = 0;
-				}
-
-				fin.get(input);*/
+			fin >> tempName;
+			strcpy(cameraData.name, tempName);
 			
+			fin >> input;
 
-				m_cameraData.push_back(frameCamData);
+			if(strcmp(input, "eye") == 0)
+			{
+
+				fin >> cameraData.x;
+				fin >> cameraData.y;
+				fin >> cameraData.z;
+
+				m_cameraData.push_back(cameraData);
 			}
 		}
+		fin >> input;
 	}
 	
 	fin.close();

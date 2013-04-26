@@ -6,6 +6,7 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+
 using namespace std;
 
 class Importer{
@@ -22,7 +23,8 @@ private:
 
 	struct cameraDataType
 	{
-		float x, y, z;//camera position
+		char name[32];
+		float x, y, z; //camera position
 	};
 
 public:
@@ -42,7 +44,7 @@ public:
 private:
 	char* m_filename;
 	vector<vector<vertexDataType>> m_modelData;
-	vector<vector<cameraDataType>> m_cameraData;
+	vector<cameraDataType> m_cameraData;
 	vector<float> m_keyFrameTimes;
 
 };
