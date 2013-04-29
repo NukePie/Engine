@@ -149,3 +149,8 @@ bool Importer::LoadCamera()
 	
 	fin.close();
 }
+
+vector<Importer::cameraDataType> Importer::GetCameraData()
+{
+	return m_cameraData;
+}

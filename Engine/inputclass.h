@@ -30,6 +30,7 @@ public:
 	bool IsDownPressed();
 	bool IsLeftPressed();
 	bool IsRightPressed();
+	bool IsZPressed();//Cam toogle
 	bool IsWPressed();//Forward
 	bool IsAPressed();//Left
 	bool IsSPressed();//Back

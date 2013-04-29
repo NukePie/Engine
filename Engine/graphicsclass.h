@@ -18,6 +18,7 @@
 #include "shadowshaderclass.h"
 #include "modellistclass.h"
 #include "frustumclass.h"
+#include "importer.h"
 
 //GLOBALS
 const bool FULL_SCREEN = false;
@@ -48,6 +49,7 @@ private:
 private:
 	D3DClass* m_D3D;
 	CameraClass* m_Camera;
+	Importer* m_Importer;
 	InstanceModelClass *m_Model, *m_City, *m_Bullet, *m_Sphere;
 	LightClass* m_Light;
 	ParticleShaderClass* m_ParticleShader;
@@ -61,6 +63,10 @@ private:
 	RenderTextureClass* m_RenderTexture;
 	DepthShaderClass* m_DepthShader;
 	ShadowShaderClass* m_ShadowShader;
+
+	vector<Importer::cameraDataType> m_Cameras;
+	int m_CurrentCam;
+	bool m_PreviousZKeyState;
 
 	ModelListClass* m_ModelList;
 	FrustumClass* m_Frustrum;

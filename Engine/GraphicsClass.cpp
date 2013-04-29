@@ -21,6 +21,7 @@ GraphicsClass::GraphicsClass()
 	m_TerrainShader		= 0;
 	m_ModelList			= 0;
 	m_Frustrum			= 0;
+	m_Importer			= 0;
 }
 
 GraphicsClass::GraphicsClass(const GraphicsClass& other)
@@ -85,6 +86,20 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd, HIN
 	//Set the initial position of the camera
 	m_Camera->SetPosition(cameraX, cameraY, cameraZ);
 	m_Camera->SetRotation(0, 0, 0); //this gets overridden by something further down, hehe
+
+	
+
+	m_Importer = new Importer;
+	if(!m_Importer)
+	{
+		return false;
+	}
+
+	m_Importer->Initialize("../Engine/cube.txt");
+
+	m_Importer->LoadCamera();
+		
+	m_Cameras = m_Importer->GetCameraData();
 
 	//create the terrain object
 	m_Terrain = new TerrainClass;
@@ -373,6 +388,12 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd, HIN
 
 void GraphicsClass::Shutdown()
 {
+	if(m_Importer)
+	{
+		delete m_Importer;
+		m_Importer = 0;
+	}
+
 	// Release the shadow shader object.
 	if(m_ShadowShader)
 	{
@@ -591,7 +612,6 @@ bool GraphicsClass::Frame(unsigned long updateCount)
 	return true;
 }
 
-
 bool GraphicsClass::RenderSceneToTexture()
 {
 	D3DXMATRIX worldMatrix, lightViewMatrix, lightProjectionMatrix, translateMatrix;
@@ -665,7 +685,6 @@ bool GraphicsClass::RenderSceneToTexture()
 	return true;
 }
 
-
 bool GraphicsClass::HandleInput(float frameTime)
 {
 	bool keyDown;
@@ -704,6 +723,18 @@ bool GraphicsClass::HandleInput(float frameTime)
 
 	keyDown = m_Input->IsDownPressed();
 	m_Position->LookDownward(keyDown);
+
+	if(m_Input->IsZPressed() && !m_PreviousZKeyState)
+	{
+		if((++m_CurrentCam) > m_Cameras.size() - 1)
+		{
+			m_CurrentCam = 0;
+		}
+		m_Position->SetPosition(m_Cameras[m_CurrentCam].x, m_Cameras[m_CurrentCam].y, m_Cameras[m_CurrentCam].z);
+		m_PreviousZKeyState = true;
+	}
+	else if(!m_Input->IsZPressed())
+		m_PreviousZKeyState = false;
 
 	m_Input->GetMouseLocation(mousePosX, mousePosY);
 	m_Position->MouseLook(mousePosX, mousePosY);

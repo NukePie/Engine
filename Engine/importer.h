@@ -11,6 +11,13 @@ using namespace std;
 
 class Importer{
 
+public:
+	struct cameraDataType
+	{
+		char name[32];
+		float x, y, z; //camera position
+	};
+
 private:
 	struct vertexDataType
 	{
@@ -19,12 +26,6 @@ private:
 		float tx, ty, tz;
 		float bx, by, bz;
 		float u, v;
-	};
-
-	struct cameraDataType
-	{
-		char name[32];
-		float x, y, z; //camera position
 	};
 
 public:
@@ -37,7 +38,7 @@ public:
 	bool LoadModel();
 	bool LoadCamera();
 	
-	void GetCameraData();
+	vector<cameraDataType> GetCameraData();
 	
 	bool GetModelData();
 
