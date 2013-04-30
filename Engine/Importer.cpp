@@ -133,16 +133,22 @@ bool Importer::LoadCamera()
 			strcpy(cameraData.name, tempName);
 			
 			fin >> input;
-
 			if(strcmp(input, "eye") == 0)
 			{
 
 				fin >> cameraData.x;
 				fin >> cameraData.y;
 				fin >> cameraData.z;
-
-				m_cameraData.push_back(cameraData);
 			}
+
+			fin >> input;
+			if(strcmp(input, "rot") == 0)
+			{
+				fin >> cameraData.rotX;
+				fin >> cameraData.rotY;
+				fin >> cameraData.rotZ;
+			}
+			m_cameraData.push_back(cameraData);
 		}
 		fin >> input;
 	}

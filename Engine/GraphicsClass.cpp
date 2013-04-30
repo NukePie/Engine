@@ -6,6 +6,7 @@ GraphicsClass::GraphicsClass()
 	m_D3D				= 0;
 	m_Camera			= 0;
 	m_Model				= 0;
+	m_AxisModel			= 0;
 	m_City				= 0;
 	m_Bullet			= 0;
 	m_Sphere			= 0;
@@ -229,6 +230,7 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd, HIN
 		return false;
 	}
 	m_Model->SetInstanceCount(4);
+
 	//Initialize tomte model object
 	result = m_Model->Initialize(m_D3D->GetDevice(),"../Engine/Tomte.obj", L"../Engine/Tomte_Texture.png", L"../Engine/Tomte_Normal.png");
 	if(!result)
@@ -238,6 +240,27 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd, HIN
 	}
 
 	m_Model->SetPosition(0.0f, -30.25f, 0.0f);
+
+	////////////// AXIS MODEL ///////////////////
+
+	// Create axis model object.
+	m_AxisModel = new InstanceModelClass;
+	if(!m_AxisModel)
+	{
+		return false;
+	}
+
+	//Initialize tomte model object
+	result = m_AxisModel->Initialize(m_D3D->GetDevice(),"../Engine/axis.obj", L"../Engine/axis_color.png", L"../Engine/blankNormal.png");
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
+		return false;
+	}
+
+	m_AxisModel->SetPosition(0.0f, 0.0f, 0.0f);
+
+	////////////// END AXIS MODEL //////////////////
 
 		//Create model object
 	m_City = new InstanceModelClass;
@@ -495,6 +518,13 @@ void GraphicsClass::Shutdown()
 		m_Model = 0;
 	}
 	
+	if(m_AxisModel)
+	{
+		m_AxisModel->Shutdown();
+		delete m_AxisModel;
+		m_AxisModel = 0;
+	}
+
 	if(m_Bullet)
 	{
 		m_Bullet->Shutdown();
@@ -731,6 +761,7 @@ bool GraphicsClass::HandleInput(float frameTime)
 			m_CurrentCam = 0;
 		}
 		m_Position->SetPosition(m_Cameras[m_CurrentCam].x, m_Cameras[m_CurrentCam].y, m_Cameras[m_CurrentCam].z);
+		m_Position->SetRotation(m_Cameras[m_CurrentCam].rotX, m_Cameras[m_CurrentCam].rotY, m_Cameras[m_CurrentCam].rotZ);
 		m_PreviousZKeyState = true;
 	}
 	else if(!m_Input->IsZPressed())
@@ -824,6 +855,32 @@ bool GraphicsClass::Render(unsigned long updateCount)
 		lightViewMatrix,
 		lightProjectionMatrix,
 		m_Model->GetTextureArray(),
+		m_RenderTexture->GetShaderResourceView(),
+		m_Light->GetPosition(),
+		m_Light->GetAmbientColor(),
+		m_Light->GetDiffuseColor()
+		);
+	
+	if(!result)
+	{
+		return false;
+	}
+
+	m_AxisModel->GetPosition(posX, posY, posZ);
+	D3DXMatrixTranslation(&worldMatrix, posX, posY, posZ);
+
+	m_AxisModel->Render(m_D3D->GetDeviceContext());
+
+	result = m_ShadowShader->Render(
+		m_D3D->GetDeviceContext(),
+		m_AxisModel->GetIndexCount(),
+		m_AxisModel->GetInstanceCount(),
+		worldMatrix,
+		viewMatrix,
+		projectionMatrix,
+		lightViewMatrix,
+		lightProjectionMatrix,
+		m_AxisModel->GetTextureArray(),
 		m_RenderTexture->GetShaderResourceView(),
 		m_Light->GetPosition(),
 		m_Light->GetAmbientColor(),

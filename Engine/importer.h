@@ -16,6 +16,7 @@ public:
 	{
 		char name[32];
 		float x, y, z; //camera position
+		float rotX, rotY, rotZ;
 	};
 
 private:

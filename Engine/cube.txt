@@ -2,14 +2,6 @@ num_frames 5
 start 1
 end 24
 frame_rate 24
-cam persp
-	eye 14.3876 10.3643 -29.4468 
-cam top
-	eye 0 100.1 0 
-cam front
-	eye 0 0 100.1 
-cam side
-	eye 100.1 0 0
 
 frame 1
 	meshes 1
@@ -950,7 +942,19 @@ frame 24
 				t 0.771517 0.154303 -0.617213 
 				b 0.267261 0.801784 0.534523 
 				u 0.375 0.5
-end 
+end
+cam persp
+	eye -1.10933 1.00241 -1.24722
+	rot 32.7384 39.4 2.05799e-015
+cam top
+	eye 0 100.1 -0
+	rot 90 -0 0
+cam front
+	eye 0 0 -100.1
+	rot -0 -0 0
+cam side
+	eye 100.1 0 -0
+	rot 0 -90 0
 ti 0.0416667
 ti 0.0833333
 ti 0.208333

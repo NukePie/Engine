@@ -50,7 +50,7 @@ private:
 	D3DClass* m_D3D;
 	CameraClass* m_Camera;
 	Importer* m_Importer;
-	InstanceModelClass *m_Model, *m_City, *m_Bullet, *m_Sphere;
+	InstanceModelClass *m_Model, *m_City, *m_Bullet, *m_Sphere, *m_AxisModel;
 	LightClass* m_Light;
 	ParticleShaderClass* m_ParticleShader;
 	ParticleSystemClass* m_ParticleSystem, *m_ParticleSystem2, *m_ParticleSystem3;
