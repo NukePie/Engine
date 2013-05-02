@@ -777,7 +777,7 @@ bool GraphicsClass::HandleInput(float frameTime)
 	m_Position->GetPosition(posX, posY, posZ);
 	// Set position of the camera.
 	
-	m_Camera->SetRotation(rotX, rotY, rotZ);
+	m_Camera->SetRotation( rotX, rotY, rotZ);
 	// Set height to terrain.
 	float height = m_Terrain->GetHeightAtPos(-50, -50);
 	if(height == -1.0f)

@@ -1,6 +1,5 @@
 #include "instancemodelclass.h"
 
-
 using namespace std;
 
 InstanceModelClass::InstanceModelClass()
@@ -33,6 +32,9 @@ bool InstanceModelClass::Initialize(ID3D11Device* device, char* modelFilename, W
 	}
 
 	m_importer->Initialize("../Engine/cube.txt");
+	
+	m_keyFrameData = m_importer->GetModelData();
+	m_keyFrameTimes = m_importer->GetKeyFrameTimes();
 
 	result = LoadFile(modelFilename);
 	if(!result)
@@ -72,6 +74,13 @@ void InstanceModelClass::Shutdown()
 	}
 
 	return;
+}
+
+void InstanceModelClass::Frame(float time)
+{
+
+
+	GetInterpolatedFrameData(time);
 }
 
 void InstanceModelClass::Render(ID3D11DeviceContext* deviceContext)
@@ -760,4 +769,19 @@ bool InstanceModelClass::LoadDataStructures(char* filename, int& vertexCount, in
 	}
 
 	return true;
+}
+
+void InstanceModelClass::InterpolateFrameData(float time)
+{
+	float animLength = m_keyFrameTimes[m_keyFrameTimes.size() - 1] - m_keyFrameTimes[0];
+	float currAnimTime = fmod(time, animLength);
+	int previousKeyIndex; // The place in the array in which the previous key is at
+
+	for(int i = 0; m_keyFrameTimes.size() < i; i++)
+	{
+		if(m_keyFrameTimes[i] <= currAnimTime)
+		{
+			// TODO: calc previous key index
+		}
+	}
 }

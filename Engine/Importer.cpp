@@ -33,8 +33,8 @@ bool Importer::LoadModel()
 			{
 				int tempCount = 0;
 				//int count;
-				vector<vertexDataType> frameData;
-				vertexDataType vertexData;
+				vector<ModelType> frameData;
+				ModelType vertexData;
 
 				while(input != 'e')
 				{
@@ -68,13 +68,13 @@ bool Importer::LoadModel()
 						fin >> vertexData.bx;
 						fin >> vertexData.by;
 						fin >> vertexData.bz;
-						tempCount++;				
+						tempCount++;
 					}
 
 					if(input == 'u')
 					{
-						fin >> vertexData.u;
-						fin >> vertexData.v;
+						fin >> vertexData.tu;
+						fin >> vertexData.tv;
 						tempCount++;				
 					}
 
@@ -159,4 +159,14 @@ bool Importer::LoadCamera()
 vector<Importer::cameraDataType> Importer::GetCameraData()
 {
 	return m_cameraData;
+}
+
+vector<vector<ModelType>> Importer::GetModelData()
+{
+	return m_modelData;
+}
+
+vector<float> Importer::GetKeyFrameTimes()
+{
+	return m_keyFrameTimes;
 }

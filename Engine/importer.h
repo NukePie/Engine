@@ -1,12 +1,10 @@
-
-
 #ifndef _IMPORTER_H_
 #define _IMPORTER_H_
 
 #include <vector>
 #include <iostream>
 #include <fstream>
-
+#include "common.h"
 using namespace std;
 
 class Importer{
@@ -17,16 +15,6 @@ public:
 		char name[32];
 		float x, y, z; //camera position
 		float rotX, rotY, rotZ;
-	};
-
-private:
-	struct vertexDataType
-	{
-		float x, y, z;
-		float nx, ny, nz;
-		float tx, ty, tz;
-		float bx, by, bz;
-		float u, v;
 	};
 
 public:
@@ -40,14 +28,13 @@ public:
 	bool LoadCamera();
 	
 	vector<cameraDataType> GetCameraData();
-	
-	bool GetModelData();
+	vector<float> GetKeyFrameTimes();
+	vector<vector<ModelType>> GetModelData();
 
 private:
 	char* m_filename;
-	vector<vector<vertexDataType>> m_modelData;
+	vector<vector<ModelType>> m_modelData;
 	vector<cameraDataType> m_cameraData;
 	vector<float> m_keyFrameTimes;
-
 };
 #endif

@@ -1,6 +1,3 @@
-
-
-
 #ifndef _INSTANCEMODELCLASS_H_
 #define _INSTANCEMODELCLASS_H_
 
@@ -10,11 +7,13 @@
 
 #include <iostream>
 #include <fstream>
+#include <math.h>
 using namespace std;
 
 //MY CLASS INCLUDES
-#include "texturearrayclass.h"
 #include "importer.h"
+#include "texturearrayclass.h"
+#include "common.h"
 
 
 class InstanceModelClass
@@ -41,14 +40,6 @@ private:
 		float x, y, z;
 	};
 
-	struct ModelType
-	{
-		float x, y, z;
-		float tu, tv;
-		float nx, ny, nz;
-		float tx, ty, tz;
-		float bx, by, bz;
-	};
 
 	struct TempVertexType
 	{
@@ -66,6 +57,7 @@ private:
 	{
 		D3DXVECTOR3 position;
 	};
+
 	
 public:
 	InstanceModelClass();
@@ -81,12 +73,14 @@ public:
 	int GetVertexCount();
 	int GetInstanceCount();
 
+	void Frame(float);
 	void SetInstanceCount(int);
 
 	ID3D11ShaderResourceView** GetTextureArray();
 
 	void SetPosition(float, float, float);
 	void GetPosition(float&, float&, float&);
+
 
 private:
 	bool InitializeBuffers(ID3D11Device*);
@@ -95,6 +89,8 @@ private:
 
 	bool LoadTextures(ID3D11Device*, WCHAR*, WCHAR*);
 	void ReleaseTextures();
+	
+	void InterpolateFrameData(float);
 
 
 	bool LoadFile(char*);
@@ -129,6 +125,8 @@ private:
 
 	ModelType* m_model;
 	Importer* m_importer;
+	vector<vector<ModelType>> m_keyFrameData;
+	vector<float> m_keyFrameTimes;
 
 	float m_positionX, m_positionY, m_positionZ;
 };
