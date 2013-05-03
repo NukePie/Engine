@@ -25,23 +25,14 @@ bool InstanceModelClass::Initialize(ID3D11Device* device, char* modelFilename, W
 {
 	bool result;
 
-	m_importer = new Importer();
-	if(!m_importer)
-	{
-		return false;
-	}
-
-	m_importer->Initialize("../Engine/cube.txt");
-	
-	m_keyFrameData = m_importer->GetModelData();
-	m_keyFrameTimes = m_importer->GetKeyFrameTimes();
-
-	result = LoadFile(modelFilename);
+	result = LoadFile("../Engine/cube.txt");
 	if(!result)
 	{
 		return false;
 	}
-	
+
+	InterpolateFrameData(0.0f);
+
 	CalculateModelVectors();
 
 	result = InitializeBuffers(device); //calling initialization functions for vertex and index buffers
@@ -78,9 +69,7 @@ void InstanceModelClass::Shutdown()
 
 void InstanceModelClass::Frame(float time)
 {
-
-
-	GetInterpolatedFrameData(time);
+	InterpolateFrameData(time);
 }
 
 void InstanceModelClass::Render(ID3D11DeviceContext* deviceContext)
@@ -484,25 +473,43 @@ bool InstanceModelClass::LoadFile(char* filename)
 	bool result;
 	int vertexCount, textureCount, normalCount, faceCount, groupCount;
 
-	result = ReadFileCounts(filename, vertexCount, textureCount, normalCount, faceCount, groupCount);
-	if(!result)
+	m_importer = new Importer();
+	if(!m_importer)
 	{
 		return false;
 	}
 
-	m_vertexCount = (faceCount * 3);
-	m_indexCount = (faceCount * 3);
-	result = LoadDataStructures(filename, vertexCount, textureCount, normalCount, faceCount);
-	if(!result)
-	{
-		return false;
-	}
+	m_importer->Initialize(filename);
 
 	result = m_importer->LoadModel();
 	if(!result)
 	{
 		return false;
 	}
+	
+	m_keyFrameData = m_importer->GetModelData();
+	m_keyFrameTimes = m_importer->GetKeyFrameTimes();
+
+	m_vertexCount = m_keyFrameData[0].size();
+	m_indexCount = m_vertexCount;
+
+	/*
+	result = ReadFileCounts(filename, vertexCount, textureCount, normalCount, faceCount, groupCount);
+	if(!result)
+	{
+		return false;
+	}
+	*/
+	// m_vertexCount = (faceCount * 3);
+	// m_indexCount = (faceCount * 3);
+	
+	/*
+	result = LoadDataStructures(filename, vertexCount, textureCount, normalCount, faceCount);
+	if(!result)
+	{
+		return false;
+	}
+	*/
 
 	return true;
 }
@@ -773,15 +780,22 @@ bool InstanceModelClass::LoadDataStructures(char* filename, int& vertexCount, in
 
 void InstanceModelClass::InterpolateFrameData(float time)
 {
+	// Convert miliseconds to seconds
+	time = time * 0.001;
 	float animLength = m_keyFrameTimes[m_keyFrameTimes.size() - 1] - m_keyFrameTimes[0];
-	float currAnimTime = fmod(time, animLength);
-	int previousKeyIndex; // The place in the array in which the previous key is at
+	float currAnimTime = fmod(time, animLength);// + m_keyFrameTimes[0];
+	int previousKeyIndex = 0;
+	// The place in the array in which the previous key is at
 
-	for(int i = 0; m_keyFrameTimes.size() < i; i++)
+	for(int i = 0; m_keyFrameTimes.size() > i; i++)
 	{
-		if(m_keyFrameTimes[i] <= currAnimTime)
+		if(m_keyFrameTimes[i] >= currAnimTime)
 		{
-			// TODO: calc previous key index
+			previousKeyIndex = i;
+			break;
 		}
 	}
+
+	// TODO: All m_keyFrameData data is identical, FIGURE IT OUT MAN!
+	m_model = &m_keyFrameData[previousKeyIndex][0];
 }

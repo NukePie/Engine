@@ -564,7 +564,6 @@ void GraphicsClass::Shutdown()
 bool GraphicsClass::Frame(unsigned long updateCount)
 {
 	bool result;
-
 	
 	static float lightPositionX = 0.0f;
 
@@ -617,6 +616,9 @@ bool GraphicsClass::Frame(unsigned long updateCount)
 
 	//update the system stat
 	m_Timer->Frame();
+
+	// Animate models
+	m_AxisModel->Frame(m_Timer->GetTime());
 
 	//do the frame input processing
 	result = HandleInput(m_Timer->GetTime());
