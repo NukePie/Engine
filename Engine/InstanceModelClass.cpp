@@ -25,13 +25,15 @@ bool InstanceModelClass::Initialize(ID3D11Device* device, char* modelFilename, W
 {
 	bool result;
 
+	m_model = new ModelType[36];
+
 	result = LoadFile("../Engine/cube.txt");
 	if(!result)
 	{
 		return false;
 	}
 
-	InterpolateFrameData(0.0f);
+	InterpolateFrameData(500.0f);
 
 	CalculateModelVectors();
 
@@ -67,7 +69,7 @@ void InstanceModelClass::Shutdown()
 	return;
 }
 
-void InstanceModelClass::Frame(float time)
+void InstanceModelClass::Frame(ID3D11Device* device, float time)
 {
 	InterpolateFrameData(time);
 }
@@ -182,10 +184,6 @@ bool InstanceModelClass::InitializeBuffers(ID3D11Device* device)
 
 	delete [] indices;
 	indices = 0;
-
-	
-	//set the number of instances
-	//m_instanceCount = 4;
 
 	//create instance array
 	instances = new InstanceType[m_instanceCount];
@@ -432,7 +430,7 @@ void InstanceModelClass::RenderBuffers(ID3D11DeviceContext* deviceContext) //sen
 	bufferPointer[0] = m_vertexBuffer;
 	bufferPointer[1] = m_instanceBuffer;
 
-	deviceContext->IASetVertexBuffers(0, 2, bufferPointer, stride, offset);		//might be &stride and &offset
+	deviceContext->IASetVertexBuffers(0, 2, bufferPointer, stride, offset);
 	
 	deviceContext->IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
@@ -797,5 +795,10 @@ void InstanceModelClass::InterpolateFrameData(float time)
 	}
 
 	// TODO: All m_keyFrameData data is identical, FIGURE IT OUT MAN!
-	m_model = &m_keyFrameData[previousKeyIndex][0];
+	//m_model = &m_keyFrameData[previousKeyIndex][0];
+
+	for (int i = 0; i < 36; i++)
+	{
+		m_model[i] = m_keyFrameData[previousKeyIndex][i];
+	}
 }

@@ -618,7 +618,7 @@ bool GraphicsClass::Frame(unsigned long updateCount)
 	m_Timer->Frame();
 
 	// Animate models
-	m_AxisModel->Frame(m_Timer->GetTime());
+	m_AxisModel->Frame(m_D3D->GetDevice(), m_Timer->GetTime());
 
 	//do the frame input processing
 	result = HandleInput(m_Timer->GetTime());
@@ -867,6 +867,10 @@ bool GraphicsClass::Render(unsigned long updateCount)
 	{
 		return false;
 	}
+	
+
+	// Reset the world matrix.
+	m_D3D->GetWorldMatrix(worldMatrix);
 
 	m_AxisModel->GetPosition(posX, posY, posZ);
 	D3DXMatrixTranslation(&worldMatrix, posX, posY, posZ);

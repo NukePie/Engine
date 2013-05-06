@@ -73,7 +73,7 @@ public:
 	int GetVertexCount();
 	int GetInstanceCount();
 
-	void Frame(float);
+	void Frame(ID3D11Device*, float);
 	void SetInstanceCount(int);
 
 	ID3D11ShaderResourceView** GetTextureArray();
@@ -123,7 +123,7 @@ private:
 
 	TextureArrayClass* m_TextureArray;
 
-	ModelType* m_model;
+	ModelType * m_model;
 	Importer* m_importer;
 	vector<vector<ModelType>> m_keyFrameData;
 	vector<float> m_keyFrameTimes;
