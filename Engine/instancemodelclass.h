@@ -64,7 +64,7 @@ public:
 	InstanceModelClass(const InstanceModelClass&);
 	~InstanceModelClass();
 
-	bool Initialize(ID3D11Device*, char*, WCHAR*, WCHAR*);
+	bool Initialize(ID3D11Device*, ID3D11DeviceContext *, char*, WCHAR*, WCHAR*);
 	void Shutdown();
 	void Render(ID3D11DeviceContext*);
 
@@ -73,7 +73,7 @@ public:
 	int GetVertexCount();
 	int GetInstanceCount();
 
-	void Frame(ID3D11Device*, float);
+	void Frame(ID3D11DeviceContext*, float);
 	void SetInstanceCount(int);
 
 	ID3D11ShaderResourceView** GetTextureArray();
@@ -90,7 +90,7 @@ private:
 	bool LoadTextures(ID3D11Device*, WCHAR*, WCHAR*);
 	void ReleaseTextures();
 	
-	void InterpolateFrameData(float);
+	void InterpolateFrameData(ID3D11DeviceContext *, float, bool);
 
 
 	bool LoadFile(char*);
@@ -127,6 +127,7 @@ private:
 	Importer* m_importer;
 	vector<vector<ModelType>> m_keyFrameData;
 	vector<float> m_keyFrameTimes;
+	VertexType * vertices;
 
 	float m_positionX, m_positionY, m_positionZ;
 };
