@@ -90,8 +90,8 @@ private:
 	bool LoadTextures(ID3D11Device*, WCHAR*, WCHAR*);
 	void ReleaseTextures();
 	
-	void InterpolateFrameData(ID3D11DeviceContext *, float, bool);
-
+	bool InterpolateFrameData(float);
+	bool UpdateBuffers(ID3D11DeviceContext *);
 
 	bool LoadFile(char*);
 
@@ -127,7 +127,6 @@ private:
 	Importer* m_importer;
 	vector<vector<ModelType>> m_keyFrameData;
 	vector<float> m_keyFrameTimes;
-	VertexType * vertices;
 
 	float m_positionX, m_positionY, m_positionZ;
 };

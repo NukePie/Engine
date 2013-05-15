@@ -371,7 +371,7 @@ void ParticleSystemClass::EmitParticles(float frameTime, D3DXVECTOR3 emitterPosi
 void ParticleSystemClass::UpdateParticles(float FrameTime, D3DXVECTOR3 camPos)
 {
 	int i;
-	//D3DXVECTOR3 
+
 	//each frame we will update all particles by making them move using the position, velocity and the frame time
 	for(i=0; i<m_currentParticleCount; i++)
 	{

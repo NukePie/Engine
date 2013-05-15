@@ -33,7 +33,7 @@ bool InstanceModelClass::Initialize(ID3D11Device* device, ID3D11DeviceContext * 
 		return false;
 	}
 
-	InterpolateFrameData(deviceContext, 200.0f, true);
+	InterpolateFrameData(200.0f);
 
 	CalculateModelVectors();
 
@@ -42,8 +42,6 @@ bool InstanceModelClass::Initialize(ID3D11Device* device, ID3D11DeviceContext * 
 	{
 		return false;
 	}
-	
-	InterpolateFrameData(deviceContext, 200.0f, false);
 
 	result = LoadTextures(device, textureFilename1, textureFilename2);
 	if(!result)
@@ -67,16 +65,14 @@ void InstanceModelClass::Shutdown()
 		delete m_importer;
 		m_importer = 0;
 	}
-	
-	delete [] vertices;
-	vertices = 0;
 
 	return;
 }
 
 void InstanceModelClass::Frame(ID3D11DeviceContext* deviceContext, float time)
 {
-	InterpolateFrameData(deviceContext, time, false);
+ 	InterpolateFrameData(time);
+	UpdateBuffers(deviceContext);
 }
 
 void InstanceModelClass::Render(ID3D11DeviceContext* deviceContext)
@@ -118,6 +114,7 @@ bool InstanceModelClass::InitializeBuffers(ID3D11Device* device)
 	unsigned long* indices;
 	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc, instanceBufferDesc;
 	D3D11_SUBRESOURCE_DATA vertexData, indexData, instanceData;
+	VertexType * vertices;
 	HRESULT result;
 	int i;
 
@@ -184,8 +181,8 @@ bool InstanceModelClass::InitializeBuffers(ID3D11Device* device)
 	}
 
 	//deleting the vertex and index arrays since we are done with them
-	//delete [] vertices;
-	//vertices = 0;
+	delete [] vertices;
+	vertices = 0;
 
 	delete [] indices;
 	indices = 0;
@@ -781,60 +778,84 @@ bool InstanceModelClass::LoadDataStructures(char* filename, int& vertexCount, in
 	return true;
 }
 
-void InstanceModelClass::InterpolateFrameData(ID3D11DeviceContext * deviceContext, float time, bool firstRun)
+bool InstanceModelClass::InterpolateFrameData(float time)
 {
 	// Convert miliseconds to seconds
-	time = time * 0.001;
+	time = time * 0.001f;
 	float animLength = m_keyFrameTimes[m_keyFrameTimes.size() - 1] - m_keyFrameTimes[0];
 	float currAnimTime = fmod(time, animLength);// + m_keyFrameTimes[0];
 	int previousKeyIndex = 0;
 	// The place in the array in which the previous key is at
 
-	for(int i = 0; m_keyFrameTimes.size() > i; i++)
+	for(unsigned int i = 0; m_keyFrameTimes.size() > i; i++)
 	{
 		if(m_keyFrameTimes[i] >= currAnimTime)
 		{
-			float timeDifference = m_keyFrameTimes[i] - m_keyFrameTimes[i - 1];
-			float timeToFirst = currAnimTime - m_keyFrameTimes[i - 1];
+			if(i == 0)
+			{
+				previousKeyIndex = 0;
+			}
+			else
+			{
+				previousKeyIndex = i - 1;
+			}
+
+			float timeDifference = m_keyFrameTimes[i] - m_keyFrameTimes[previousKeyIndex];
+			float timeToFirst = currAnimTime - m_keyFrameTimes[previousKeyIndex];
 			float difference = timeToFirst / timeDifference;
 			
-			previousKeyIndex = i - 1;
 
 			m_model = &m_keyFrameData[previousKeyIndex][0];
 
-			for (int k = 0; k < 36; k++)
+			/*
+			for (int k = 0; k < m_vertexCount; k++)
 			{
 				//m_model[i].x = 0.0f;
-				m_model[k].x = m_keyFrameData[previousKeyIndex + 1][k].x + ( (m_keyFrameData[previousKeyIndex + 1][k].x - m_keyFrameData[previousKeyIndex][k].x) * difference);
+				//m_model[k].x = m_keyFrameData[previousKeyIndex + 1][k].x + ( (m_keyFrameData[previousKeyIndex + 1][k].x - m_keyFrameData[previousKeyIndex][k].x) * difference);
 				//m_model[i].y = m_keyFrameData[previousKeyIndex][i + 1].y + ( (m_keyFrameData[previousKeyIndex][i + 1].y - m_keyFrameData[previousKeyIndex][i].y) * difference);
-				//m_model[i].z = m_keyFrameData[previousKeyIndex][i + 1].z + ( (m_keyFrameData[previousKeyIndex][i + 1].z - m_keyFrameData[previousKeyIndex][i].z) * difference);
+				m_model[k].z = m_keyFrameData[previousKeyIndex][k + 1].z + ( (m_keyFrameData[previousKeyIndex][k + 1].z - m_keyFrameData[previousKeyIndex][k].z) * difference);
 			}
-
+			*/
 			break;
 		}
 	}
 
-	// TODO: All m_keyFrameData data is identical, FIGURE IT OUT MAN!
-	//
+	return true;
+}
 
-	if(firstRun == true)
-	{	return; }
-
+bool InstanceModelClass::UpdateBuffers(ID3D11DeviceContext * deviceContext)
+{
 	D3D11_MAPPED_SUBRESOURCE resource;
 	HRESULT hResult;
-	
-	hResult = deviceContext->Map(m_vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &resource);
-	if(hResult != S_OK)
-	{	return; }
+	VertexType * vertices;
+	vertices = new VertexType[m_vertexCount];
 
-	VertexType * dataPtr = (VertexType*)resource.pData;
+	//initialize vertex array to zeroes at first
+	memset(vertices, 0, (sizeof(VertexType) *m_vertexCount));
 
 	for(int i = 0; i < 36; i++)
 	{
-		dataPtr[i].position = D3DXVECTOR3(m_model[i].x, m_model[i].y, m_model[i].z);
+		vertices[i].binormal = D3DXVECTOR3(m_model[i].bx, m_model[i].by, m_model[i].bz);
+		vertices[i].normal   = D3DXVECTOR3(m_model[i].nx, m_model[i].ny, m_model[i].nz);
+		vertices[i].position = D3DXVECTOR3(m_model[i].x, m_model[i].y, m_model[i].z);
+		vertices[i].tangent  = D3DXVECTOR3(m_model[i].tx, m_model[i].ty, m_model[i].tz);
+		vertices[i].texture  = D3DXVECTOR2(m_model[i].tu, m_model[i].tv);
+	}
+	
+	hResult = deviceContext->Map(m_vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &resource);
+	if(hResult != S_OK)
+	{
+		return false;
 	}
 
-	//resource.pData = vertices;
+	VertexType * dataPtr = (VertexType*)resource.pData;
+
+	memcpy(dataPtr, (void*)vertices, (sizeof(VertexType) *m_vertexCount));
 
 	deviceContext->Unmap(m_vertexBuffer, 0);
+	
+	delete vertices;
+	vertices = 0;
+
+	return true;
 }

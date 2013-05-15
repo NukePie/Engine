@@ -65,7 +65,7 @@ private:
 	ShadowShaderClass* m_ShadowShader;
 
 	vector<Importer::cameraDataType> m_Cameras;
-	int m_CurrentCam;
+	unsigned int m_CurrentCam;
 	bool m_PreviousZKeyState;
 
 	ModelListClass* m_ModelList;
