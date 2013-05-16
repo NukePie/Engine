@@ -24,17 +24,18 @@ InstanceModelClass::~InstanceModelClass()
 bool InstanceModelClass::Initialize(ID3D11Device* device, ID3D11DeviceContext * deviceContext, char* modelFilename, WCHAR* textureFilename1, WCHAR* textureFilename2)
 {
 	bool result;
+	m_animTime = 0.0f;
 
 	m_model = new ModelType[36];
 
-	result = LoadFile("../Engine/cube.txt");
+	result = LoadFile("../Engine/test.txt");
 	if(!result)
 	{
 		return false;
 	}
 
-	InterpolateFrameData(200.0f);
-
+	InitializeModelData();
+	//InterpolateFrameData(0.0f);
 	CalculateModelVectors();
 
 	result = InitializeBuffers(device); //calling initialization functions for vertex and index buffers
@@ -780,16 +781,14 @@ bool InstanceModelClass::LoadDataStructures(char* filename, int& vertexCount, in
 
 bool InstanceModelClass::InterpolateFrameData(float time)
 {
-	// Convert miliseconds to seconds
-	time = time * 0.001f;
-	float animLength = m_keyFrameTimes[m_keyFrameTimes.size() - 1] - m_keyFrameTimes[0];
-	float currAnimTime = fmod(time, animLength);// + m_keyFrameTimes[0];
-	int previousKeyIndex = 0;
-	// The place in the array in which the previous key is at
+	m_animTime += time;
+	float animLength = m_keyFrameTimes[m_keyFrameTimes.size() - 1] * 1000 - m_keyFrameTimes[0] * 1000;
+	float currAnimTime = fmod(m_animTime, animLength);
+	int previousKeyIndex; // The place in the array in which the previous key is at
 
 	for(unsigned int i = 0; m_keyFrameTimes.size() > i; i++)
 	{
-		if(m_keyFrameTimes[i] >= currAnimTime)
+		if(m_keyFrameTimes[i] * 1000 >= currAnimTime)
 		{
 			if(i == 0)
 			{
@@ -800,24 +799,46 @@ bool InstanceModelClass::InterpolateFrameData(float time)
 				previousKeyIndex = i - 1;
 			}
 
-			float timeDifference = m_keyFrameTimes[i] - m_keyFrameTimes[previousKeyIndex];
-			float timeToFirst = currAnimTime - m_keyFrameTimes[previousKeyIndex];
-			float difference = timeToFirst / timeDifference;
+			float timeDifference = m_keyFrameTimes[i] * 1000 - m_keyFrameTimes[previousKeyIndex] * 1000;
+			float timeToPrevious = currAnimTime - m_keyFrameTimes[previousKeyIndex] * 1000;
+			float difference = timeToPrevious / timeDifference;
 			
-
-			m_model = &m_keyFrameData[previousKeyIndex][0];
-
-			/*
 			for (int k = 0; k < m_vertexCount; k++)
 			{
-				//m_model[i].x = 0.0f;
-				//m_model[k].x = m_keyFrameData[previousKeyIndex + 1][k].x + ( (m_keyFrameData[previousKeyIndex + 1][k].x - m_keyFrameData[previousKeyIndex][k].x) * difference);
-				//m_model[i].y = m_keyFrameData[previousKeyIndex][i + 1].y + ( (m_keyFrameData[previousKeyIndex][i + 1].y - m_keyFrameData[previousKeyIndex][i].y) * difference);
-				m_model[k].z = m_keyFrameData[previousKeyIndex][k + 1].z + ( (m_keyFrameData[previousKeyIndex][k + 1].z - m_keyFrameData[previousKeyIndex][k].z) * difference);
+				m_model[k].x = m_keyFrameData[previousKeyIndex][k].x + ( (m_keyFrameData[previousKeyIndex + 1][k].x - m_keyFrameData[previousKeyIndex][k].x) * difference);
+				m_model[k].y = m_keyFrameData[previousKeyIndex][k].y + ( (m_keyFrameData[previousKeyIndex + 1][k].y - m_keyFrameData[previousKeyIndex][k].y) * difference);
+				m_model[k].z = m_keyFrameData[previousKeyIndex][k].z + ( (m_keyFrameData[previousKeyIndex + 1][k].z - m_keyFrameData[previousKeyIndex][k].z) * difference);
 			}
-			*/
+
 			break;
 		}
+	}
+
+	return true;
+}
+
+bool InstanceModelClass::InitializeModelData()
+{
+	for (int k = 0; k < m_vertexCount; k++)
+	{
+		m_model[k].x = m_keyFrameData[0][k].x;
+		m_model[k].y = m_keyFrameData[0][k].y;
+		m_model[k].z = m_keyFrameData[0][k].z;
+		
+		m_model[k].bx = m_keyFrameData[0][k].bx;
+		m_model[k].by = m_keyFrameData[0][k].by;
+		m_model[k].bz = m_keyFrameData[0][k].bz;
+
+		m_model[k].nx = m_keyFrameData[0][k].nx;
+		m_model[k].ny = m_keyFrameData[0][k].ny;
+		m_model[k].nz = m_keyFrameData[0][k].nz;
+
+		m_model[k].tu = m_keyFrameData[0][k].tu;
+		m_model[k].tv = m_keyFrameData[0][k].tv;
+
+		m_model[k].tx = m_keyFrameData[0][k].tx;
+		m_model[k].ty = m_keyFrameData[0][k].ty;
+		m_model[k].tz = m_keyFrameData[0][k].tz;
 	}
 
 	return true;
@@ -833,7 +854,7 @@ bool InstanceModelClass::UpdateBuffers(ID3D11DeviceContext * deviceContext)
 	//initialize vertex array to zeroes at first
 	memset(vertices, 0, (sizeof(VertexType) *m_vertexCount));
 
-	for(int i = 0; i < 36; i++)
+	for(int i = 0; i < m_vertexCount; i++)
 	{
 		vertices[i].binormal = D3DXVECTOR3(m_model[i].bx, m_model[i].by, m_model[i].bz);
 		vertices[i].normal   = D3DXVECTOR3(m_model[i].nx, m_model[i].ny, m_model[i].nz);

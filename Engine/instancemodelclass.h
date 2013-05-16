@@ -90,6 +90,7 @@ private:
 	bool LoadTextures(ID3D11Device*, WCHAR*, WCHAR*);
 	void ReleaseTextures();
 	
+	bool InitializeModelData();
 	bool InterpolateFrameData(float);
 	bool UpdateBuffers(ID3D11DeviceContext *);
 
@@ -129,6 +130,8 @@ private:
 	vector<float> m_keyFrameTimes;
 
 	float m_positionX, m_positionY, m_positionZ;
+
+	float m_animTime;
 };
 
 #endif
