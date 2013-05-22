@@ -26,13 +26,18 @@ public:
 	void Initialize(char*);
 	bool LoadModel();
 	bool LoadCamera();
+	bool LoadTexture();
 	
+	void GetColorTextureName(char *);
+	void GetNormalTextureName(char *);
 	vector<cameraDataType> GetCameraData();
 	vector<float> GetKeyFrameTimes();
 	vector<vector<ModelType>> GetModelData();
 
 private:
 	char* m_filename;
+	char m_colorTextureName[32];
+	char m_normalTextureName[32];
 	vector<vector<ModelType>> m_modelData;
 	vector<cameraDataType> m_cameraData;
 	vector<float> m_keyFrameTimes;

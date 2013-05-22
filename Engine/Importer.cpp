@@ -156,6 +156,58 @@ bool Importer::LoadCamera()
 	fin.close();
 }
 
+bool Importer::LoadTexture()
+{
+	ifstream fin;
+	char input[256];
+
+	fin.open(m_filename);
+	if(fin.fail() == true)
+	{
+		return false;
+	}
+
+	fin >> input;
+	while(!fin.eof())
+	{
+		if(strcmp(input, "color") == 0)
+		{
+			//char tempName = new char[32];
+
+			fin >> m_colorTextureName;
+			//strcpy(m_colorTextureName, tempName);
+			
+			//delete tempName;
+			//tempName = 0;
+		}
+		
+		if(strcmp(input, "normal") == 0)
+		{
+			//char tempName = new char[32];
+			fin >> m_normalTextureName;
+			//fin >> tempName;
+			//strcpy(m_normalTextureName, tempName);
+			
+			//delete tempName;
+			//tempName = 0;
+		}
+
+		fin >> input;
+	}
+	
+	fin.close();
+}
+
+void Importer::GetColorTextureName(char textureName[32])
+{
+	memcpy(textureName, m_colorTextureName, 32);
+}
+
+void Importer::GetNormalTextureName(char textureName[32])
+{
+	memcpy(textureName, m_normalTextureName, 32);
+}
+
 vector<Importer::cameraDataType> Importer::GetCameraData()
 {
 	return m_cameraData;

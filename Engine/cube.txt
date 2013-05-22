@@ -6,9 +6,8 @@ frame_rate 24
 frame 1
 	meshes 1
 		name pCube1
-			color C:/Users/Jonas/Desktop/MayaImporterExporter/ImporterExporter/Bin/Textures/image2.gif
-			bump NONE
-			bumpDepth 0
+			color ../Engine/horsepose1.jpg
+			normal ../Engine/horseposeBump.jpg
 			vl
 				p -0.5 0.5 -0.5
 				n -0.57735 0.57735 -0.57735 
@@ -194,9 +193,8 @@ end
 frame 2
 	meshes 1
 		name pCube1
-			color C:/Users/Jonas/Desktop/MayaImporterExporter/ImporterExporter/Bin/Textures/image2.gif
-			bump NONE
-			bumpDepth 0
+			color ../Engine/horsepose1.jpg
+			normal ../Engine/horseposeBump.jpg
 			vl
 				p -0.5 0.5 -1.4375
 				n -0.57735 0.57735 -0.57735 
@@ -382,9 +380,8 @@ end
 frame 5
 	meshes 1
 		name pCube1
-			color C:/Users/Jonas/Desktop/MayaImporterExporter/ImporterExporter/Bin/Textures/image2.gif
-			bump NONE
-			bumpDepth 0
+			color ../Engine/horsepose1.jpg
+			normal ../Engine/horseposeBump.jpg
 			vl
 				p -0.5 0.5 -6.5
 				n -0.57735 0.57735 -0.57735 
@@ -570,9 +567,8 @@ end
 frame 10
 	meshes 1
 		name pCube1
-			color C:/Users/Jonas/Desktop/MayaImporterExporter/ImporterExporter/Bin/Textures/image2.gif
-			bump NONE
-			bumpDepth 0
+			color ../Engine/horsepose1.jpg
+			normal ../Engine/horseposeBump.jpg
 			vl
 				p -0.5 0.5 3.5
 				n -0.57735 0.57735 -0.57735 
@@ -758,9 +754,8 @@ end
 frame 24
 	meshes 1
 		name pCube1
-			color C:/Users/Jonas/Desktop/MayaImporterExporter/ImporterExporter/Bin/Textures/image2.gif
-			bump NONE
-			bumpDepth 0
+			color ../Engine/horsepose1.jpg
+			normal ../Engine/horseposeBump.jpg
 			vl
 				p -0.5 0.5 -0.5
 				n -0.57735 0.57735 -0.57735 

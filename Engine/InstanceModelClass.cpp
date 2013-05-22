@@ -21,21 +21,19 @@ InstanceModelClass::~InstanceModelClass()
 {
 }
 
-bool InstanceModelClass::Initialize(ID3D11Device* device, ID3D11DeviceContext * deviceContext, char* modelFilename, WCHAR* textureFilename1, WCHAR* textureFilename2)
+bool InstanceModelClass::Initialize(ID3D11Device* device, ID3D11DeviceContext * deviceContext, char* modelFilename)
 {
 	bool result;
 	m_animTime = 0.0f;
 
-	m_model = new ModelType[36];
-
-	result = LoadFile("../Engine/test.txt");
+	result = LoadFile(modelFilename);
 	if(!result)
 	{
 		return false;
 	}
 
+	m_model = new ModelType[m_vertexCount];
 	InitializeModelData();
-	//InterpolateFrameData(0.0f);
 	CalculateModelVectors();
 
 	result = InitializeBuffers(device); //calling initialization functions for vertex and index buffers
@@ -44,7 +42,7 @@ bool InstanceModelClass::Initialize(ID3D11Device* device, ID3D11DeviceContext * 
 		return false;
 	}
 
-	result = LoadTextures(device, textureFilename1, textureFilename2);
+	result = LoadTextures(device);
 	if(!result)
 	{
 		return false;
@@ -227,7 +225,7 @@ bool InstanceModelClass::InitializeBuffers(ID3D11Device* device)
 	return true;
 }
 
-bool InstanceModelClass::LoadTextures(ID3D11Device* device, WCHAR* filename1, WCHAR* filename2)
+bool InstanceModelClass::LoadTextures(ID3D11Device* device)
 {
 	bool result;
 
@@ -237,11 +235,30 @@ bool InstanceModelClass::LoadTextures(ID3D11Device* device, WCHAR* filename1, WC
 		return false;
 	}
 
-	result = m_TextureArray->Initialize(device, filename1, filename2);
+	char colorTextureName[32];
+	char normalTextureName[32];
+	
+	m_importer->LoadTexture();
+	m_importer->GetColorTextureName(colorTextureName);
+	m_importer->GetNormalTextureName(normalTextureName);
+
+
+	size_t size = strlen(colorTextureName) + 1;
+	wchar_t* wColorTextureName = new wchar_t[size];
+	mbstowcs(wColorTextureName, &colorTextureName[0], size);
+
+	size_t size2 = strlen(normalTextureName) + 1;
+	wchar_t* wNormalTextureName = new wchar_t[size2];
+	mbstowcs(wNormalTextureName, &normalTextureName[0], size2);
+
+	result = m_TextureArray->Initialize(device, wColorTextureName, wNormalTextureName);
 	if(!result)
 	{
 		return false;
 	}
+
+	delete wNormalTextureName;
+	delete wColorTextureName;
 
 	return true;
 }
@@ -493,24 +510,6 @@ bool InstanceModelClass::LoadFile(char* filename)
 
 	m_vertexCount = m_keyFrameData[0].size();
 	m_indexCount = m_vertexCount;
-
-	/*
-	result = ReadFileCounts(filename, vertexCount, textureCount, normalCount, faceCount, groupCount);
-	if(!result)
-	{
-		return false;
-	}
-	*/
-	// m_vertexCount = (faceCount * 3);
-	// m_indexCount = (faceCount * 3);
-	
-	/*
-	result = LoadDataStructures(filename, vertexCount, textureCount, normalCount, faceCount);
-	if(!result)
-	{
-		return false;
-	}
-	*/
 
 	return true;
 }

@@ -217,7 +217,7 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd, HIN
 	}
 
 	// Initialize sphere model object.
-	result = m_Sphere->Initialize(m_D3D->GetDevice(), m_D3D->GetDeviceContext(), "../Engine/sphere.obj", L"../Engine/brick.dds", L"../Engine/blankNormal.png");
+	result = m_Sphere->Initialize(m_D3D->GetDevice(), m_D3D->GetDeviceContext(), "../Engine/cube.txt");
 	if(!result)
 	{
 		return false;
@@ -232,7 +232,7 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd, HIN
 	m_Model->SetInstanceCount(4);
 
 	//Initialize tomte model object
-	result = m_Model->Initialize(m_D3D->GetDevice(), m_D3D->GetDeviceContext(),"../Engine/Tomte.obj", L"../Engine/Tomte_Texture.png", L"../Engine/Tomte_Normal.png");
+	result = m_Model->Initialize(m_D3D->GetDevice(), m_D3D->GetDeviceContext(), "../Engine/cube.txt");
 	if(!result)
 	{
 		MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
@@ -251,7 +251,7 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd, HIN
 	}
 
 	//Initialize Axis model object
-	result = m_AxisModel->Initialize(m_D3D->GetDevice(), m_D3D->GetDeviceContext(),"../Engine/axis.obj", L"../Engine/axis_color.png", L"../Engine/blankNormal.png");
+	result = m_AxisModel->Initialize(m_D3D->GetDevice(), m_D3D->GetDeviceContext(), "../Engine/cube.txt");
 	if(!result)
 	{
 		MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
@@ -270,7 +270,7 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd, HIN
 	}
 	m_City->SetInstanceCount(1);
 	//Initialize model object
-	result = m_City->Initialize(m_D3D->GetDevice(), m_D3D->GetDeviceContext(),"../Engine/Duk.obj", L"../Engine/duk.png", L"../Engine/blankNormal.png");
+	result = m_City->Initialize(m_D3D->GetDevice(), m_D3D->GetDeviceContext(), "../Engine/hast.txt");
 	if(!result)
 	{
 		MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
@@ -288,7 +288,7 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd, HIN
 	}
 	m_Bullet->SetInstanceCount(2);
 	//Initialize model object
-	result = m_Bullet->Initialize(m_D3D->GetDevice(), m_D3D->GetDeviceContext(),"../Engine/Bullet.obj", L"../Engine/BulletDiffuseMap.png", L"../Engine/blankNormal.png");
+	result = m_Bullet->Initialize(m_D3D->GetDevice(), m_D3D->GetDeviceContext(), "../Engine/cube.txt");
 	if(!result)
 	{
 		MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
@@ -643,6 +643,7 @@ bool GraphicsClass::Frame(unsigned long updateCount)
 
 	// Animate models
 	m_AxisModel->Frame(m_D3D->GetDeviceContext(), m_Timer->GetTime());
+	m_City->Frame(m_D3D->GetDeviceContext(), m_Timer->GetTime());
 
 	return true;
 }
