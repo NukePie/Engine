@@ -785,6 +785,8 @@ bool InstanceModelClass::InterpolateFrameData(float time)
 	float currAnimTime = fmod(m_animTime, animLength);
 	int previousKeyIndex; // The place in the array in which the previous key is at
 
+	//currAnimTime = 0.0f;
+
 	for(unsigned int i = 0; m_keyFrameTimes.size() > i; i++)
 	{
 		if(m_keyFrameTimes[i] * 1000 >= currAnimTime)
@@ -800,7 +802,11 @@ bool InstanceModelClass::InterpolateFrameData(float time)
 
 			float timeDifference = m_keyFrameTimes[i] * 1000 - m_keyFrameTimes[previousKeyIndex] * 1000;
 			float timeToPrevious = currAnimTime - m_keyFrameTimes[previousKeyIndex] * 1000;
-			float difference = timeToPrevious / timeDifference;
+			float difference = 0.0f;
+			if(timeDifference > 0)
+			{
+				difference = timeToPrevious / timeDifference;
+			}
 			
 			for (int k = 0; k < m_vertexCount; k++)
 			{

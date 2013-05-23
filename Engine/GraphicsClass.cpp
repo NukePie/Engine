@@ -971,21 +971,21 @@ bool GraphicsClass::Render(unsigned long updateCount)
 	
 
 	// Render the model using the texture shader.
-	result = m_ParticleShader->Render(m_D3D->GetDeviceContext(), m_ParticleSystem->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_ParticleSystem->GetTexture());
+	//result = m_ParticleShader->Render(m_D3D->GetDeviceContext(), m_ParticleSystem->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_ParticleSystem->GetTexture());
 	if(!result)
 	{
 		return false;
 	}
 
-	m_ParticleSystem2->Render(m_D3D->GetDeviceContext());
-	result = m_ParticleShader->Render(m_D3D->GetDeviceContext(), m_ParticleSystem2->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_ParticleSystem2->GetTexture());
+	//m_ParticleSystem2->Render(m_D3D->GetDeviceContext());
+	//result = m_ParticleShader->Render(m_D3D->GetDeviceContext(), m_ParticleSystem2->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_ParticleSystem2->GetTexture());
 	if(!result)
 	{
 		return false;
 	}
 
-	m_ParticleSystem3->Render(m_D3D->GetDeviceContext());
-	result = m_ParticleShader->Render(m_D3D->GetDeviceContext(), m_ParticleSystem3->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_ParticleSystem3->GetTexture());
+	//m_ParticleSystem3->Render(m_D3D->GetDeviceContext());
+	//result = m_ParticleShader->Render(m_D3D->GetDeviceContext(), m_ParticleSystem3->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_ParticleSystem3->GetTexture());
 	if(!result)
 	{
 		return false;
