@@ -1006,7 +1006,9 @@ bool TerrainClass::Render(
 	D3DXVECTOR4 ambientColor,
 	D3DXVECTOR4 diffuseColor,
 	D3DXVECTOR3 lightDirection,
-	D3DXVECTOR3 camPosition
+	D3DXVECTOR3 camPosition,
+	float fogStart,
+	float fogEnd
 	)
 {
 	unsigned int stride;
@@ -1026,7 +1028,9 @@ bool TerrainClass::Render(
 		projectionMatrix,
 		ambientColor,
 		diffuseColor,
-		lightDirection
+		lightDirection,
+		fogStart,
+		fogEnd
 		);
 	if(!result)
 	{

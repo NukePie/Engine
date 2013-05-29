@@ -10,14 +10,13 @@ cbuffer LightBuffer
 	float4 ambientColor;
 	float4 diffuseColor;
 	float3 lightDirection;
-	float padding;
+	//float padding;
 };
 
 cbuffer TextureInfoBuffer
 {
 	float3 camPosition;
 	bool useAlpha;
-	
 };
 
 //TYPEDEFS
@@ -32,6 +31,7 @@ struct PixelInputType
 	float3 viewDir : TEXCOORD1;
 	matrix viewMatrix : MATRIX0;
 	float3 norm : POSITION0;
+	float fogFactor : FOG;
 };
 
 SamplerState samTriLinearSam
@@ -62,6 +62,7 @@ float4 LightPixelShader(PixelInputType input): SV_TARGET
 	float4 alphaValue;
 	float4 blendColor;
 	float4 reflectivityColor;
+	float4 fogColor;
 
 	alphaValue = input.color.x;
 
@@ -90,6 +91,8 @@ float4 LightPixelShader(PixelInputType input): SV_TARGET
 		//sample the second texture
 		textureColor2 = shaderTexture2.Sample(SampleType, input.tex);
 
+
+
 		//alpha blend the two colors together based on the alpha value
 		blendColor = (alphaValue * textureColor2) + ((1.0 - alphaValue) * textureColor1);
 	}
@@ -112,5 +115,11 @@ float4 LightPixelShader(PixelInputType input): SV_TARGET
 
 	color = color + (reflectionColor * 0.2f);
 	
+	// Set the color of the fog to grey.
+	fogColor = float4(0.5f, 0.5f, 0.5f, 1.0f);
+
+	// Calculate the final color using the fog effect equation.
+	color = input.fogFactor * color + (1.0 - input.fogFactor) * fogColor;
+
 	return color;
 }

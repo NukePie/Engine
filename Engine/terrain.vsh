@@ -6,6 +6,11 @@ cbuffer MatrixBuffer
 	matrix projectionMatrix;
 };
 
+cbuffer FogBuffer
+{
+	float fogStart;
+	float fogEnd;
+};
 
 //TYPEDEFS
 struct VertexInputType
@@ -28,6 +33,7 @@ struct PixelInputType
 	float3 viewDir : TEXCOORD1;
 	matrix viewMatrix : MATRIX0;
 	float3 norm : POSITION0;
+	float fogFactor : FOG;
 };
 
 
@@ -36,7 +42,7 @@ struct PixelInputType
 PixelInputType TerrainVertexShader(VertexInputType input)
 {
 	PixelInputType output;
-	float4 worldPosition;
+	float4 cameraPosition;
 	
 	output.viewMatrix = worldMatrix;
 
@@ -50,6 +56,13 @@ PixelInputType TerrainVertexShader(VertexInputType input)
 
 	//store the texture coordinates for the pixel shader
 	output.tex = input.tex;
+
+	// Calculate the camera position.
+	cameraPosition = mul(input.position, worldMatrix);
+	cameraPosition = mul(cameraPosition, viewMatrix);
+
+	// Calculate linear fog.
+	output.fogFactor = saturate((fogEnd - cameraPosition.z) / (fogEnd - fogStart));
 
 	//calculate the normal vector against the world matrix only.
 	output.normal = mul(input.normal, worldMatrix);

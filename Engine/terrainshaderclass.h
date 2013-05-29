@@ -19,9 +19,15 @@ private:
 		D3DXMATRIX projection;
 	};
 
+	struct FogBufferType
+	{
+		float fogStart;
+		float fogEnd;
+		float padding1, padding2;
+	};
+
 	struct LightBufferType
 	{
-		
 		D3DXVECTOR4 ambientColor;
 		D3DXVECTOR4 diffuseColor;
 		D3DXVECTOR3 lightDirection;//testing
@@ -49,7 +55,9 @@ public:
 		D3DXMATRIX,
 		D3DXVECTOR4,
 		D3DXVECTOR4,
-		D3DXVECTOR3
+		D3DXVECTOR3,
+		float,
+		float
 		);
 	bool SetShaderTextures(
 		ID3D11DeviceContext*,
@@ -77,6 +85,7 @@ private:
 	ID3D11Buffer* m_matrixBuffer;
 	ID3D11Buffer* m_lightBuffer;
 	ID3D11Buffer* m_textureInfoBuffer;
+	ID3D11Buffer* m_fogBuffer;
 };
 
 #endif

@@ -64,7 +64,9 @@ public:
 		D3DXVECTOR4,
 		D3DXVECTOR4,
 		D3DXVECTOR3,
-		D3DXVECTOR3
+		D3DXVECTOR3,
+		float,
+		float
 		);
 
 	int GetIndexCount();

@@ -805,16 +805,23 @@ bool GraphicsClass::Render(unsigned long updateCount)
 	D3DXVECTOR4 color;
 	int modelCount, renderCount, index;
 	bool result, renderModel;
-	float posX, posY, posZ, radius;
+	float posX, posY, posZ, radius, fogColor, fogStart, fogEnd;
 	
 	result = RenderSceneToTexture();
 	if(!result)
 	{
 		return false;
 	}
+
+	// Set the color of the fog to grey.
+	fogColor = 0.5f;
+
+	// Set the start and end of the fog.
+	fogStart = 0.0f;
+	fogEnd = 100.0f;
 	
 	// Clear the buffers and set the color to grey.
-	m_D3D->BeginScene(0.1f, 0.1f, 0.1f, 1.0f); 
+	m_D3D->BeginScene(fogColor, fogColor, fogColor, 1.0f); 
 
 	// Generate the view matrix based on Cam's pos.
 	m_Camera->Render();
@@ -837,7 +844,9 @@ bool GraphicsClass::Render(unsigned long updateCount)
 		m_Light->GetAmbientColor(),
 		m_Light->GetDiffuseColor(),
 		m_Light->GetDirection(),
-		m_Camera->GetPosition()
+		m_Camera->GetPosition(),
+		fogStart,
+		fogEnd
 		);
 		
 	if(!result)

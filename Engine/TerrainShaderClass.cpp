@@ -10,6 +10,7 @@ TerrainShaderClass::TerrainShaderClass()
 	m_matrixBuffer = 0;
 	m_lightBuffer = 0;
 	m_textureInfoBuffer = 0;
+	m_fogBuffer = 0;
 }
 
 
@@ -60,6 +61,7 @@ bool TerrainShaderClass::InitializeShader(
 	D3D11_BUFFER_DESC matrixBufferDesc;
 	D3D11_BUFFER_DESC lightBufferDesc;
 	D3D11_BUFFER_DESC textureInfoBufferDesc;
+	D3D11_BUFFER_DESC fogBufferDesc;
 
 	errorMessage = 0;
 	vertexShaderBuffer = 0;
@@ -269,12 +271,32 @@ bool TerrainShaderClass::InitializeShader(
 		return false;
 	}
 
+	// Setup the description of the dynamic fog constatnt buffer that is in the vertex shader.
+	fogBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	fogBufferDesc.ByteWidth = sizeof(FogBufferType);
+	fogBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	fogBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	fogBufferDesc.MiscFlags = 0;
+	fogBufferDesc.StructureByteStride = 0;
+
+	// Create the fog buffer pointer so we can access the vertex shader fog constant buffer from within this class.
+	result = device->CreateBuffer(&fogBufferDesc, NULL, &m_fogBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
 	return true;
 }
 
 void TerrainShaderClass::ShutdownShader()
 {
-	
+	if(m_fogBuffer)
+	{
+		m_fogBuffer->Release();
+		m_fogBuffer = 0;
+	}
+
 	if(m_textureInfoBuffer)
 	{
 		m_textureInfoBuffer->Release();
@@ -359,7 +381,9 @@ bool TerrainShaderClass::SetShaderParameters(
 	D3DXMATRIX projectionMatrix,
 	D3DXVECTOR4 ambientColor,
 	D3DXVECTOR4 diffuseColor,
-	D3DXVECTOR3 lightDirection
+	D3DXVECTOR3 lightDirection,
+	float fogStart,
+	float fogEnd
 	)
 {
 	HRESULT result;
@@ -367,6 +391,7 @@ bool TerrainShaderClass::SetShaderParameters(
 	unsigned int bufferNumber;
 	MatrixBufferType* dataPtr;
 	LightBufferType* dataPtr2;
+	FogBufferType* dataPtr3;
 
 	//transpose the matrices to prepare them for the shader, this is a requirement for DX11
 	D3DXMatrixTranspose(&worldMatrix, &worldMatrix);
@@ -429,6 +454,29 @@ bool TerrainShaderClass::SetShaderParameters(
 
 	//Set it in the pixel shader with updated values
 	deviceContext->PSSetConstantBuffers(bufferNumber, 1,&m_lightBuffer);
+
+	// Lock the fog constant buffer so it can be written to.
+	result = deviceContext->Map(m_fogBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the constant buffer.
+	dataPtr3 = (FogBufferType*)mappedResource.pData;
+
+	// Copy the fog information into the fog constant buffer.
+	dataPtr3->fogStart = fogStart;
+	dataPtr3->fogEnd = fogEnd;
+
+	// Unlock the constant buffer.
+	deviceContext->Unmap(m_fogBuffer, 0);
+
+	// Set the position of the fog constant buffer in the vertex shader.
+	bufferNumber = 1;
+
+	// Now set the fog buffer in the vertex shader with the updated values.
+	deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_fogBuffer);
 
 	return true;
 }
