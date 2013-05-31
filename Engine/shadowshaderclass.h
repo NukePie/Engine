@@ -25,6 +25,15 @@ private:
 	{
 		D3DXVECTOR4 ambientColor;
 		D3DXVECTOR4 diffuseColor;
+		D3DXVECTOR4 specularColor;
+		float specularPower;
+		D3DXVECTOR3 lightDirection;
+	};
+
+	struct CameraBufferType
+	{
+		D3DXVECTOR3 cameraPosition;
+		float padding;
 	};
 
 	struct LightBufferType2
@@ -53,7 +62,10 @@ public:
 		ID3D11ShaderResourceView*,
 		D3DXVECTOR3,
 		D3DXVECTOR4,
-		D3DXVECTOR4
+		D3DXVECTOR4,
+		D3DXVECTOR3,
+		D3DXVECTOR4,
+		D3DXVECTOR3
 		);
 
 private:
@@ -72,7 +84,10 @@ private:
 		ID3D11ShaderResourceView*,
 		D3DXVECTOR3,
 		D3DXVECTOR4,
-		D3DXVECTOR4
+		D3DXVECTOR4,
+		D3DXVECTOR3,
+		D3DXVECTOR4,
+		D3DXVECTOR3
 		);
 	void RenderShader(ID3D11DeviceContext*, int, int);
 
@@ -87,5 +102,6 @@ private:
 	ID3D11Buffer* m_matrixBuffer;
 	ID3D11Buffer* m_lightBuffer; //constant buffer for the light information (color)
 	ID3D11Buffer* m_lightBuffer2;
+	ID3D11Buffer* m_cameraBuffer;
 };
 #endif

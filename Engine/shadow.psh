@@ -1,5 +1,5 @@
 //GLOBALS
-Texture2D shaderTexture[2] : register(t1);
+Texture2D shaderTexture[3] : register(t1);
 Texture2D depthMapTexture : register(t0);
 
 SamplerState SampleTypeClamp : register(s0);
@@ -19,6 +19,9 @@ cbuffer LightBuffer
 {
 	float4 ambientColor;
 	float4 diffuseColor;
+	float4 specularColor;
+	//float specularPower;
+	float3 lightDirection;
 };
 
 //TYPEDEFS
@@ -32,6 +35,7 @@ struct PixelInputType
 	float4 wPos : TEXCOORD3;
 	float3 tangent : TANGENT;
     float3 binormal : BINORMAL;
+	float3 viewDirection : TEXCOORD4;
 };
 
 // This method is used to do a 2x2 PCF calculation.
@@ -74,6 +78,10 @@ float4 ShadowPixelShader(PixelInputType input): SV_TARGET
 	float4 bumpMap;
 	float3 bumpNormal;
 	float3 lightVec;
+	float3 lightDir;
+	float4 specular;
+	float4 specularIntensity;
+	float3 reflection;
 
 	// Shadow mapping requires a bias adjustment when comparing the depth of the light and the depth of the object due to the low floating point precision of the depth map.
     // Set the bias value for fixing the floating point precision issues.
@@ -119,6 +127,7 @@ float4 ShadowPixelShader(PixelInputType input): SV_TARGET
 		// END PCF
 		/////////////////////////////////////////
 
+
 		// The final PCF value is used when determining if lighting calculations should be done
 		if(shadowCoeff > 0)
 		{
@@ -146,5 +155,26 @@ float4 ShadowPixelShader(PixelInputType input): SV_TARGET
 	textureColor = shaderTexture[0].Sample(SampleTypeWrap, input.tex);
 
 	color = color * textureColor;
+
+	//invert the light direction for light calc
+	lightDir = -lightDirection;
+	if(lightIntensity > 0.0f)
+	{
+		// Sample the specular map
+		specularIntensity = shaderTexture[2].Sample(SampleTypeWrap, input.tex);
+
+		// Calculate the reflection vector based on the light intensity, normal vector and light dir.
+		reflection = normalize(2 * lightIntensity * bumpNormal - lightDir);
+
+		// Determine the amount of specular light based on the reflection vector, view dir and specPower
+		specular = pow(saturate(dot(reflection, input.viewDirection)), 1.0f);
+
+		//multiply the specular light at the pixel with the specular intensity from the specular map
+		specular = specular * specularIntensity;
+
+		//Add the specular component the the output
+		color = saturate(color + specular);
+	}
+
 	return color;
 }

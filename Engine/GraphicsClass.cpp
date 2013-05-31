@@ -642,7 +642,7 @@ bool GraphicsClass::Frame(unsigned long updateCount)
 	}
 
 	// Animate models
-	//m_AxisModel->Frame(m_D3D->GetDeviceContext(), m_Timer->GetTime());
+	m_AxisModel->Frame(m_D3D->GetDeviceContext(), m_Timer->GetTime());
 	//m_City->Frame(m_D3D->GetDeviceContext(), m_Timer->GetTime());
 
 	return true;
@@ -873,7 +873,10 @@ bool GraphicsClass::Render(unsigned long updateCount)
 		m_RenderTexture->GetShaderResourceView(),
 		m_Light->GetPosition(),
 		m_Light->GetAmbientColor(),
-		m_Light->GetDiffuseColor()
+		m_Light->GetDiffuseColor(),
+		m_Camera->GetPosition(),
+		m_Light->GetDiffuseColor(),
+		m_Light->GetDirection()
 		);
 	
 	if(!result)
@@ -903,7 +906,10 @@ bool GraphicsClass::Render(unsigned long updateCount)
 		m_RenderTexture->GetShaderResourceView(),
 		m_Light->GetPosition(),
 		m_Light->GetAmbientColor(),
-		m_Light->GetDiffuseColor()
+		m_Light->GetDiffuseColor(),
+		m_Camera->GetPosition(),
+		m_Light->GetDiffuseColor(),
+		m_Light->GetDirection()
 		);
 	
 	if(!result)
@@ -932,7 +938,10 @@ bool GraphicsClass::Render(unsigned long updateCount)
 		m_RenderTexture->GetShaderResourceView(),
 		m_Light->GetPosition(),
 		m_Light->GetAmbientColor(),
-		m_Light->GetDiffuseColor()
+		m_Light->GetDiffuseColor(),
+		m_Camera->GetPosition(),
+		m_Light->GetDiffuseColor(),
+		m_Light->GetDirection()
 		);
 	
 	if(!result)
@@ -961,7 +970,10 @@ bool GraphicsClass::Render(unsigned long updateCount)
 		m_RenderTexture->GetShaderResourceView(),
 		m_Light->GetPosition(),
 		m_Light->GetAmbientColor(),
-		m_Light->GetDiffuseColor()
+		m_Light->GetDiffuseColor(),
+		m_Camera->GetPosition(),
+		m_Light->GetDiffuseColor(),
+		m_Light->GetDirection()
 		);
 	
 	if(!result)
@@ -1051,7 +1063,10 @@ bool GraphicsClass::Render(unsigned long updateCount)
 				m_RenderTexture->GetShaderResourceView(),
 				m_Light->GetPosition(),
 				m_Light->GetAmbientColor(),
-				m_Light->GetDiffuseColor()
+				m_Light->GetDiffuseColor(),
+				m_Camera->GetPosition(),
+				m_Light->GetDiffuseColor(),
+				m_Light->GetDirection()
 				);
 			if(!result)
 			{

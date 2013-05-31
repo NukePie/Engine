@@ -192,6 +192,11 @@ bool Importer::LoadTexture()
 			//tempName = 0;
 		}
 
+		if(strcmp(input, "specular") == 0)
+		{
+			fin >> m_specularTextureName;
+		}
+
 		fin >> input;
 	}
 	
@@ -206,6 +211,11 @@ void Importer::GetColorTextureName(char textureName[32])
 void Importer::GetNormalTextureName(char textureName[32])
 {
 	memcpy(textureName, m_normalTextureName, 32);
+}
+
+void Importer::GetSpecularTextureName(char textureName[32])
+{
+	memcpy(textureName, m_specularTextureName, 32);
 }
 
 vector<Importer::cameraDataType> Importer::GetCameraData()

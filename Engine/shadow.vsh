@@ -15,6 +15,11 @@ cbuffer LightPositionBuffer
 	float padding;
 };
 
+cbuffer CameraBuffer
+{
+	float3 cameraPosition;
+};
+
 //TYPEDEFS
 struct VertexInputType
 {
@@ -36,6 +41,7 @@ struct PixelInputType
 	float4 wPos : TEXCOORD3;
 	float3 tangent : TANGENT;
     float3 binormal : BINORMAL;
+	float3 viewDirection : TEXCOORD4;
 };
 
 //VERTEX SHADER
@@ -72,6 +78,13 @@ PixelInputType ShadowVertexShader(VertexInputType input)
 
 
 	output.wPos = mul(input.position, worldMatrix);
+
+	//determine the view direction (for specular lightning)
+	output.viewDirection = cameraPosition.xyz - output.wPos.xyz;
+
+	//normalize the direction
+	output.viewDirection = normalize(output.viewDirection);
+
 	output.lightPos = mul(lightPosition, worldMatrix);
 
 	return output;

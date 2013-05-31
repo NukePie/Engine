@@ -11,6 +11,7 @@ ShadowShaderClass::ShadowShaderClass()
 	m_matrixBuffer = 0;
 	m_lightBuffer = 0;
 	m_lightBuffer2 = 0;
+	m_cameraBuffer = 0;
 }
 
 
@@ -55,7 +56,10 @@ bool ShadowShaderClass::Render(
 	ID3D11ShaderResourceView* depthMapTexture,
 	D3DXVECTOR3 lightPosition,
 	D3DXVECTOR4 ambientColor,
-	D3DXVECTOR4 diffuseColor
+	D3DXVECTOR4 diffuseColor,
+	D3DXVECTOR3 cameraPosition,
+	D3DXVECTOR4 specularColor,
+	D3DXVECTOR3 lightDirection
 	)
 {
 	bool result;
@@ -71,7 +75,10 @@ bool ShadowShaderClass::Render(
 		depthMapTexture,
 		lightPosition,
 		ambientColor,
-		diffuseColor
+		diffuseColor,
+		cameraPosition,
+		specularColor,
+		lightDirection
 		);
 	if(!result)
 	{
@@ -101,6 +108,7 @@ bool ShadowShaderClass::InitializeShader(
 	D3D11_BUFFER_DESC matrixBufferDesc;
 	D3D11_BUFFER_DESC lightColorBufferDesc;
 	D3D11_BUFFER_DESC lightPositionBufferDesc;
+	D3D11_BUFFER_DESC cameraBufferDesc;
 
 	errorMessage = 0;
 	vertexShaderBuffer = 0;
@@ -325,6 +333,19 @@ bool ShadowShaderClass::InitializeShader(
 		return false;
 	}
 
+	cameraBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	cameraBufferDesc.ByteWidth = sizeof(CameraBufferType);
+	cameraBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cameraBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	cameraBufferDesc.MiscFlags = 0;
+	cameraBufferDesc.StructureByteStride = 0;
+
+	result = device->CreateBuffer(&cameraBufferDesc, NULL, &m_cameraBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
 	return true;
 }
 
@@ -379,6 +400,11 @@ void ShadowShaderClass::ShutdownShader()
 		m_vertexShader = 0;
 	}
 
+	if(m_cameraBuffer)
+	{
+		m_cameraBuffer->Release();
+		m_cameraBuffer = 0;
+	}
 	return;
 }
 
@@ -424,7 +450,10 @@ bool ShadowShaderClass::SetShaderParameters( //this function is here to make it 
 	ID3D11ShaderResourceView* depthMapTexture,
 	D3DXVECTOR3 lightPosition,
 	D3DXVECTOR4 ambientColor,
-	D3DXVECTOR4 diffuseColor
+	D3DXVECTOR4 diffuseColor,
+	D3DXVECTOR3 cameraPosition,
+	D3DXVECTOR4 specularColor,
+	D3DXVECTOR3 lightDirection
 	)
 {
 	HRESULT result;
@@ -433,6 +462,7 @@ bool ShadowShaderClass::SetShaderParameters( //this function is here to make it 
 	MatrixBufferType* dataPtr;
 	LightBufferType* dataPtr2;
 	LightBufferType2* dataPtr3;
+	CameraBufferType* dataPtr4;
 
 	//transpose the matrices to prepare them for the shader, this is a requirement for DX11
 	D3DXMatrixTranspose(&worldMatrix, &worldMatrix);
@@ -472,7 +502,7 @@ bool ShadowShaderClass::SetShaderParameters( //this function is here to make it 
 		&m_matrixBuffer
 		);
 
-	deviceContext->PSSetShaderResources(1, 2, textureArray);
+	deviceContext->PSSetShaderResources(1, 3, textureArray);
 	deviceContext->PSSetShaderResources(0, 1, &depthMapTexture);
 
 	//lock the light position constant buffer so it can be written to
@@ -485,6 +515,8 @@ bool ShadowShaderClass::SetShaderParameters( //this function is here to make it 
 	dataPtr2 = (LightBufferType*)mappedResource.pData;
 	dataPtr2->ambientColor = ambientColor;
 	dataPtr2->diffuseColor = diffuseColor;
+	dataPtr2->lightDirection = lightDirection;
+	dataPtr2->specularColor = specularColor;
 
 	deviceContext->Unmap(m_lightBuffer, 0);
 
@@ -513,6 +545,28 @@ bool ShadowShaderClass::SetShaderParameters( //this function is here to make it 
 
 	//Set it in the pixel shader with updated values
 	deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_lightBuffer2);
+
+	//lock the camera buffer
+	result = deviceContext->Map(m_cameraBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
+	// Get a pointer to the data in the constant buffer.
+	dataPtr4 = (CameraBufferType*)mappedResource.pData;
+
+	// Copy the camera position into the constant buffer.
+	dataPtr4->cameraPosition = cameraPosition;
+
+	// Unlock the matrix constant buffer.
+	deviceContext->Unmap(m_cameraBuffer, 0);
+
+	// Set the position of the camera constant buffer in the vertex shader as the second buffer.
+	bufferNumber = 2;
+
+	// Now set the matrix constant buffer in the vertex shader with the updated values.
+	deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_cameraBuffer);
 
 	return true;
 }

@@ -30,6 +30,7 @@ public:
 	
 	void GetColorTextureName(char *);
 	void GetNormalTextureName(char *);
+	void GetSpecularTextureName(char *);
 	vector<cameraDataType> GetCameraData();
 	vector<float> GetKeyFrameTimes();
 	vector<vector<ModelType>> GetModelData();
@@ -38,6 +39,7 @@ private:
 	char* m_filename;
 	char m_colorTextureName[32];
 	char m_normalTextureName[32];
+	char m_specularTextureName[32];
 	vector<vector<ModelType>> m_modelData;
 	vector<cameraDataType> m_cameraData;
 	vector<float> m_keyFrameTimes;

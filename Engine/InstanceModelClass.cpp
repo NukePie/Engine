@@ -237,12 +237,14 @@ bool InstanceModelClass::LoadTextures(ID3D11Device* device)
 
 	char colorTextureName[32];
 	char normalTextureName[32];
+	//char specularTextureName[32];
 	
 	m_importer->LoadTexture();
 	m_importer->GetColorTextureName(colorTextureName);
 	m_importer->GetNormalTextureName(normalTextureName);
+	//m_importer->GetSpecularTextureName(specularTextureName);
 
-
+	///Make char* into WCHAR* for´the buffers
 	size_t size = strlen(colorTextureName) + 1;
 	wchar_t* wColorTextureName = new wchar_t[size];
 	mbstowcs(wColorTextureName, &colorTextureName[0], size);
@@ -251,7 +253,20 @@ bool InstanceModelClass::LoadTextures(ID3D11Device* device)
 	wchar_t* wNormalTextureName = new wchar_t[size2];
 	mbstowcs(wNormalTextureName, &normalTextureName[0], size2);
 
-	result = m_TextureArray->Initialize(device, wColorTextureName, wNormalTextureName);
+	//If there's a special specular give that. otherwise give a blank
+
+	/*size_t size3 = strlen(specularTextureName) + 1;
+	wchar_t* wSpecularTextureName = new wchar_t[size3];
+	mbstowcs(wSpecularTextureName, &specularTextureName[0], size3);
+	
+	if(specularTextureName == "None")
+	{*/
+	const size_t size3 = 50;
+	wchar_t* wSpecularTextureName = new wchar_t[size3];
+	wSpecularTextureName = L"../Engine/SpecularMap.jpg";
+	
+
+	result = m_TextureArray->Initialize(device, wColorTextureName, wNormalTextureName, wSpecularTextureName);
 	if(!result)
 	{
 		return false;
@@ -259,6 +274,7 @@ bool InstanceModelClass::LoadTextures(ID3D11Device* device)
 
 	delete wNormalTextureName;
 	delete wColorTextureName;
+	//delete wSpecularTextureName;
 
 	return true;
 }
