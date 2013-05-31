@@ -45,7 +45,7 @@ void DepthShaderClass::Shutdown()
 }
 
 
-bool DepthShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
+bool DepthShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, int instanceCount, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
 							  D3DXMATRIX projectionMatrix)
 {
 	bool result;
@@ -59,7 +59,7 @@ bool DepthShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount
 	}
 
 	// Now render the prepared buffers with the shader.
-	RenderShader(deviceContext, indexCount);
+	RenderShader(deviceContext, indexCount, instanceCount);
 
 	return true;
 }
@@ -71,7 +71,7 @@ bool DepthShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* 
 	ID3D10Blob* errorMessage;
 	ID3D10Blob* vertexShaderBuffer;
 	ID3D10Blob* pixelShaderBuffer;
-	D3D11_INPUT_ELEMENT_DESC polygonLayout[1];
+	D3D11_INPUT_ELEMENT_DESC polygonLayout[2];
 	unsigned int numElements;
 	D3D11_BUFFER_DESC matrixBufferDesc;
 
@@ -142,6 +142,15 @@ bool DepthShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* 
 	polygonLayout[0].AlignedByteOffset = 0;
 	polygonLayout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 	polygonLayout[0].InstanceDataStepRate = 0;
+
+
+	polygonLayout[1].SemanticName = "NORMAL";
+	polygonLayout[1].SemanticIndex = 0;
+	polygonLayout[1].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[1].InputSlot = 1;
+	polygonLayout[1].AlignedByteOffset = 0;
+	polygonLayout[1].InputSlotClass = D3D11_INPUT_PER_INSTANCE_DATA;
+	polygonLayout[1].InstanceDataStepRate = 1;
 
 
 
@@ -292,7 +301,7 @@ bool DepthShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, D
 }
 
 
-void DepthShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int indexCount)
+void DepthShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int indexCount, int instanceCount)
 {
 	// Set the vertex input layout.
 	deviceContext->IASetInputLayout(m_layout);
@@ -302,7 +311,7 @@ void DepthShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int inde
     deviceContext->PSSetShader(m_pixelShader, NULL, 0);
 
 	// Render the triangle.
-	deviceContext->DrawIndexed(indexCount, 0, 0);
+	deviceContext->DrawInstanced(indexCount, instanceCount, 0, 0);
 
 	return;
 }

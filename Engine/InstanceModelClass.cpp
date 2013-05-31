@@ -9,7 +9,7 @@ InstanceModelClass::InstanceModelClass()
 	m_instanceBuffer = 0;
 	m_TextureArray = 0;
 	m_model = 0;
-	m_instanceCount = 1;
+	m_instanceCount = 4;
 	m_importer = 0;
 }
 
@@ -196,7 +196,7 @@ bool InstanceModelClass::InitializeBuffers(ID3D11Device* device)
 	//load the instance array with data
 	for(int i = 0; i < m_instanceCount; i++)
 	{
-		instances[i].position = D3DXVECTOR3(i * 20.0f, 0.0f, 0.0f);
+		instances[i].position = D3DXVECTOR3(i * 50.0f, 0.0f, 0.0f);
 	}
 
 	//set up instance description

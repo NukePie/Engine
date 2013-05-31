@@ -642,8 +642,8 @@ bool GraphicsClass::Frame(unsigned long updateCount)
 	}
 
 	// Animate models
-	m_AxisModel->Frame(m_D3D->GetDeviceContext(), m_Timer->GetTime());
-	m_City->Frame(m_D3D->GetDeviceContext(), m_Timer->GetTime());
+	//m_AxisModel->Frame(m_D3D->GetDeviceContext(), m_Timer->GetTime());
+	//m_City->Frame(m_D3D->GetDeviceContext(), m_Timer->GetTime());
 
 	return true;
 }
@@ -677,7 +677,7 @@ bool GraphicsClass::RenderSceneToTexture()
 
 	// Render the city model with the depth shader.
 	m_City->Render(m_D3D->GetDeviceContext());
-	result = m_DepthShader->Render(m_D3D->GetDeviceContext(), m_City->GetIndexCount(), worldMatrix, lightViewMatrix, lightProjectionMatrix);
+	result = m_DepthShader->Render(m_D3D->GetDeviceContext(), m_City->GetIndexCount(), m_City->GetInstanceCount(), worldMatrix, lightViewMatrix, lightProjectionMatrix);
 	if(!result)
 	{
 		return false;
@@ -691,7 +691,7 @@ bool GraphicsClass::RenderSceneToTexture()
 
 	// Render the cube model with the depth shader.
 	m_Model->Render(m_D3D->GetDeviceContext());
-	result = m_DepthShader->Render(m_D3D->GetDeviceContext(), m_Model->GetIndexCount(), worldMatrix, lightViewMatrix, lightProjectionMatrix);
+	result = m_DepthShader->Render(m_D3D->GetDeviceContext(), m_Model->GetIndexCount(), m_Model->GetInstanceCount(), worldMatrix, lightViewMatrix, lightProjectionMatrix);
 	if(!result)
 	{
 		return false;
@@ -706,7 +706,7 @@ bool GraphicsClass::RenderSceneToTexture()
 
 	// Render the ground model with the depth shader.
 	m_Bullet->Render(m_D3D->GetDeviceContext());
-	result = m_DepthShader->Render(m_D3D->GetDeviceContext(), m_Bullet->GetIndexCount(), worldMatrix, lightViewMatrix, lightProjectionMatrix);
+	result = m_DepthShader->Render(m_D3D->GetDeviceContext(), m_Bullet->GetIndexCount(), m_Bullet->GetInstanceCount(), worldMatrix, lightViewMatrix, lightProjectionMatrix);
 	if(!result)
 	{
 		return false;
