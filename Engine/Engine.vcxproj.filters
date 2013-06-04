@@ -84,6 +84,9 @@
     <ClCompile Include="Importer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Goochshaderclass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="systemclass.h">
@@ -152,6 +155,9 @@
     <ClInclude Include="common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="goochshaderclass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="particle.vsh">
@@ -176,6 +182,12 @@
       <Filter>Shader Files</Filter>
     </None>
     <None Include="depth.psh">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="gooch.psh">
+      <Filter>Shader Files</Filter>
+    </None>
+    <None Include="gooch.vsh">
       <Filter>Shader Files</Filter>
     </None>
   </ItemGroup>

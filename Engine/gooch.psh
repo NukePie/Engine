@@ -1,0 +1,25 @@
+//Globals
+
+//Typedefs
+struct PixelInputType
+{
+	float4 position		: SV_POSITION;
+	float3 worldNormal	: TEXCOORD0;
+	float3 lightVec		: TEXCOORD1;
+};
+
+//Pixel Shader
+float4 GoochPixelShader(PixelInputType input): SV_TARGET
+{
+	float3 WarmColor = {1.3f, 0.9f, 0.15f};
+	float3 CoolColor = {0.05f, 0.05f, 0.6f};
+
+	float3 normLightDir		= normalize(input.lightVec);
+	float3 normSurfNormal	= normalize(input.worldNormal);
+	float cos				= dot(normLightDir, normSurfNormal); //the cosine of the angle between vec
+	float mixer				= 0.5 * (cos + 1.0);
+	float3 result			= lerp(CoolColor, WarmColor, mixer);
+	float4 herp				= float4(result, 1.0);
+
+	return herp;
+}

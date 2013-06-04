@@ -12,6 +12,7 @@ GraphicsClass::GraphicsClass()
 	m_Sphere			= 0;
 	m_Light				= 0;
 	m_ParticleShader	= 0;
+	m_GoochShader		= 0;
 	m_ParticleSystem	= 0;
 	m_ParticleSystem2	= 0;
 	m_ParticleSystem3	= 0;
@@ -270,7 +271,7 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd, HIN
 	}
 	m_City->SetInstanceCount(1);
 	//Initialize model object
-	result = m_City->Initialize(m_D3D->GetDevice(), m_D3D->GetDeviceContext(), "../Engine/sphere.txt");
+	result = m_City->Initialize(m_D3D->GetDevice(), m_D3D->GetDeviceContext(), "../Engine/hast.txt");
 	if(!result)
 	{
 		MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
@@ -377,6 +378,21 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd, HIN
 		return false;
 	}
 
+	// Create the gooch shader object.
+	m_GoochShader = new Goochshaderclass;
+	if(!m_GoochShader)
+	{
+		return false;
+	}
+
+	// Initialize the gooch shader object.
+	result = m_GoochShader->Initialize(m_D3D->GetDevice(), hwnd);
+	if(!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the gooch shader object.", L"Error", MB_OK);
+		return false;
+	}
+
 	// Create the shadow shader object.
 	m_ShadowShader = new ShadowShaderClass;
 	if(!m_ShadowShader)
@@ -415,6 +431,13 @@ void GraphicsClass::Shutdown()
 	{
 		delete m_Importer;
 		m_Importer = 0;
+	}
+
+	if(m_GoochShader)
+	{
+		m_GoochShader->Shutdown();
+		delete m_GoochShader;
+		m_GoochShader = 0;
 	}
 
 	// Release the shadow shader object.
@@ -925,6 +948,8 @@ bool GraphicsClass::Render(unsigned long updateCount)
 
 	m_City->Render(m_D3D->GetDeviceContext());
 	
+	/*
+	// Save this for if we want to add another object with this shader.
 	result = m_ShadowShader->Render(
 		m_D3D->GetDeviceContext(),
 		m_City->GetIndexCount(),
@@ -942,6 +967,15 @@ bool GraphicsClass::Render(unsigned long updateCount)
 		m_Camera->GetPosition(),
 		m_Light->GetDiffuseColor(),
 		m_Light->GetDirection()
+		);*/
+
+	result = m_GoochShader->Render(
+		m_D3D->GetDeviceContext(),
+		m_City->GetIndexCount(),
+		worldMatrix,
+		viewMatrix,
+		projectionMatrix,
+		D3DXVECTOR4(m_Light->GetPosition().x, m_Light->GetPosition().y, m_Light->GetPosition().z, 0.0f)
 		);
 	
 	if(!result)

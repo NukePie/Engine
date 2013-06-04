@@ -80,6 +80,7 @@
     <ClCompile Include="D3DClass.cpp" />
     <ClCompile Include="DepthShaderClass.cpp" />
     <ClCompile Include="FrustumClass.cpp" />
+    <ClCompile Include="Goochshaderclass.cpp" />
     <ClCompile Include="GraphicsClass.cpp" />
     <ClCompile Include="Importer.cpp" />
     <ClCompile Include="InputClass.cpp" />
@@ -105,6 +106,7 @@
     <ClInclude Include="d3dclass.h" />
     <ClInclude Include="depthshaderclass.h" />
     <ClInclude Include="frustumclass.h" />
+    <ClInclude Include="goochshaderclass.h" />
     <ClInclude Include="graphicsclass.h" />
     <ClInclude Include="importer.h" />
     <ClInclude Include="inputclass.h" />
@@ -126,6 +128,8 @@
   <ItemGroup>
     <None Include="depth.psh" />
     <None Include="depth.vsh" />
+    <None Include="gooch.psh" />
+    <None Include="gooch.vsh" />
     <None Include="particle.psh" />
     <None Include="particle.vsh" />
     <None Include="shadow.psh" />

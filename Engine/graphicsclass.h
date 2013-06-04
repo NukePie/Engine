@@ -19,6 +19,7 @@
 #include "modellistclass.h"
 #include "frustumclass.h"
 #include "importer.h"
+#include "goochshaderclass.h"
 
 //GLOBALS
 const bool FULL_SCREEN = false;
@@ -59,6 +60,7 @@ private:
 	TimerClass* m_Timer;
 	PositionClass* m_Position;
 	TerrainShaderClass* m_TerrainShader;
+	Goochshaderclass* m_GoochShader;
 
 	RenderTextureClass* m_RenderTexture;
 	DepthShaderClass* m_DepthShader;
