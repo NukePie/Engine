@@ -8,6 +8,7 @@ frame 1
 		name pCube1
 			color ../Engine/horsepose1.jpg
 			normal ../Engine/horseposeBump.jpg
+			specular NONE
 			vl
 				p -0.5 0.5 -0.5
 				n -0.57735 0.57735 -0.57735 

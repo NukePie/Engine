@@ -113,10 +113,12 @@ private:
 		int&);
 
 	void ReleaseModel();
-
+	
+	/*
 	void CalculateModelVectors();
 	void CalculateTangentBinormal(TempVertexType, TempVertexType, TempVertexType, VectorType&, VectorType&);
 	void CalculateNormal(VectorType, VectorType, VectorType&);
+	*/
 
 private:
 	ID3D11Buffer *m_vertexBuffer, *m_indexBuffer, *m_instanceBuffer;

@@ -39,7 +39,7 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd, HIN
 
 	float cameraX, cameraY, cameraZ;
 
-	//create and initialize the input object
+	// Create and initialize the input object.
 	m_Input = new InputClass;
 	if(!m_Input)
 	{
@@ -270,7 +270,7 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd, HIN
 	}
 	m_City->SetInstanceCount(1);
 	//Initialize model object
-	result = m_City->Initialize(m_D3D->GetDevice(), m_D3D->GetDeviceContext(), "../Engine/hast.txt");
+	result = m_City->Initialize(m_D3D->GetDevice(), m_D3D->GetDeviceContext(), "../Engine/sphere.txt");
 	if(!result)
 	{
 		MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
@@ -280,14 +280,14 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd, HIN
 	m_City->SetPosition(-20.0f, 0.0f, 10.0f);
 
 
-		//Create model object
+	// Create model object.
 	m_Bullet = new InstanceModelClass;
 	if(!m_Bullet)
 	{
 		return false;
 	}
 	m_Bullet->SetInstanceCount(2);
-	//Initialize model object
+	// Initialize model object.
 	result = m_Bullet->Initialize(m_D3D->GetDevice(), m_D3D->GetDeviceContext(), "../Engine/cube.txt");
 	if(!result)
 	{
@@ -330,13 +330,13 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd, HIN
 	// END FRUSTRUM
 	///////////////////////////////////////////////
 
-	//create the light object
+	// Create the light object.
 	m_Light = new LightClass;
 	if(!m_Light)
 	{
 		return false;
 	}
-	//Initialize the light object
+	// Initialize the light object.
 	m_Light->SetDiffuseColor(1.3f, 1.0f, 1.2f, 1.0f);
 	m_Light->SetAmbientColor(0.5f, 0.5f, 0.5f, 1.0f);
 	m_Light->SetDirection(0.0f, 1.0f, 0.0f);

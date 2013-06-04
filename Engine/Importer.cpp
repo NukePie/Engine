@@ -22,9 +22,6 @@ bool Importer::LoadModel()
 	fin.get(input);
 	while(!fin.eof())
 	{
-		//char test[256];
-		//fin >> test;
-
 		fin.get(input);
 		if(input == 'v')
 		{
@@ -172,24 +169,12 @@ bool Importer::LoadTexture()
 	{
 		if(strcmp(input, "color") == 0)
 		{
-			//char tempName = new char[32];
-
 			fin >> m_colorTextureName;
-			//strcpy(m_colorTextureName, tempName);
-			
-			//delete tempName;
-			//tempName = 0;
 		}
 		
 		if(strcmp(input, "normal") == 0)
 		{
-			//char tempName = new char[32];
 			fin >> m_normalTextureName;
-			//fin >> tempName;
-			//strcpy(m_normalTextureName, tempName);
-			
-			//delete tempName;
-			//tempName = 0;
 		}
 
 		if(strcmp(input, "specular") == 0)
